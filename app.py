@@ -8,7 +8,7 @@ ABSA: rule-based engine from absa_engine.py
 import os
 from datetime import datetime, date
 from functools import wraps
-from single_review import score_single_review
+# from single_review import score_single_review
 
 from flask import Flask, request, jsonify, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
@@ -698,13 +698,15 @@ def get_reviews(vid):
 @login_required
 def post_review(vid):
     import json
+    from absa_engine import analyse_text  # <-- ADD THIS LINE
+
     vp   = VendorProfile.query.get_or_404(vid)
     data = request.json or {}
     text = (data.get("review_text") or "").strip()
     if len(text) < 10:
         return jsonify({"error": "Review too short (min 10 chars)"}), 400
 
-    # ABSA analysis
+    # ABSA analysis (Using the lightweight Vercel-safe engine)
     absa_results = analyse_text(text)
     overall_sc   = sum(r["weighted_score"] for r in absa_results) / max(len(absa_results), 1)
 
