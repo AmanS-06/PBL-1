@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventify — Plan Your Event With Ease</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --purple: #9333ea;
+    --indigo-light: #818cf8;
+    --purple-light: #c084fc;
+    --bg: #ffffff;
+    --bg-sec: #f8f7ff;
+    --bg-ter: #f1f0fe;
+    --text: #0f0e1a;
+    --text-sec: #4b4866;
+    --text-muted: #8b87a8;
+    --border: rgba(79,70,229,0.15);
+    --border-hover: rgba(79,70,229,0.3);
+    --card-bg: #ffffff;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+  }
+  [data-theme="dark"] {
+    --bg: #0a0914;
+    --bg-sec: #13112b;
+    --bg-ter: #1a1836;
+    --text: #f0eeff;
+    --text-sec: #b8b4d4;
+    --text-muted: #6b67a0;
+    --border: rgba(129,140,248,0.15);
+    --border-hover: rgba(129,140,248,0.3);
+    --card-bg: #13112b;
+    --indigo: #818cf8;
+    --purple: #c084fc;
+    --indigo-light: #a5b4fc;
+    --purple-light: #d8b4fe;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
+
+  .page { display: none; animation: fadeIn 0.35s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .hidden { display: none !important; }
+
+  nav { position:sticky; top:0; z-index:100; background:var(--bg); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:64px; backdrop-filter:blur(12px); }
+  .nav-logo { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:900; background:linear-gradient(135deg,var(--indigo),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; cursor:pointer; }
+  .nav-links { display:flex; gap:.25rem; align-items:center; }
+  .nav-link { padding:.4rem .9rem; border-radius:8px; font-size:.875rem; font-weight:500; color:var(--text-sec); cursor:pointer; border:none; background:none; transition:all .2s; }
+  .nav-link:hover { background:var(--bg-sec); color:var(--text); }
+  .nav-link.active { background:var(--bg-ter); color:var(--indigo); }
+  .nav-actions { display:flex; gap:.5rem; align-items:center; }
+  .theme-toggle { width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--bg-sec); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all .2s; }
+  .theme-toggle:hover { background:var(--bg-ter); }
+
+  .btn { display:inline-flex; align-items:center; gap:.4rem; padding:.6rem 1.4rem; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; cursor:pointer; border:none; transition:all .2s; text-decoration:none; }
+  .btn-primary { background:linear-gradient(135deg,var(--indigo),var(--purple)); color:white; }
+  .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 8px 20px rgba(79,70,229,.35); }
+  .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border-hover); }
+  .btn-outline:hover { background:var(--bg-sec); border-color:var(--indigo); color:var(--indigo); }
+  .btn-sm { padding:.4rem 1rem; font-size:.8rem; border-radius:8px; }
+  .btn-ghost { background:transparent; color:var(--text-sec); border:1px solid transparent; }
+  .btn-ghost:hover { background:var(--bg-sec); color:var(--text); }
+  .btn-danger { background:#fee2e2; color:var(--danger); }
+  .btn-success { background:#d1fae5; color:var(--success); }
+  .btn-warn { background:#fef3c7; color:var(--warning); }
+
+  .hero { position:relative; overflow:hidden; min-height:88vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#9333ea 100%); text-align:center; padding:4rem 2rem; }
+  .hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .hero-content { position:relative; z-index:1; max-width:760px; }
+  .hero-badge { display:inline-flex; align-items:center; gap:.5rem; background:rgba(255,255,255,.15); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.25); color:white; padding:.35rem 1rem; border-radius:100px; font-size:.8rem; font-weight:500; margin-bottom:1.5rem; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.5rem,6vw,4.5rem); font-weight:900; color:white; line-height:1.1; margin-bottom:1.25rem; }
+  .hero h1 em { font-style:italic; opacity:.9; }
+  .hero p { font-size:1.15rem; color:rgba(255,255,255,.82); line-height:1.7; margin-bottom:2rem; }
+  .hero-ctas { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+  .hero-ctas .btn-primary { background:white; color:var(--indigo); font-weight:600; }
+  .hero-ctas .btn-primary:hover { box-shadow:0 12px 28px rgba(0,0,0,.2); transform:translateY(-2px); }
+  .hero-ctas .btn-outline { border-color:rgba(255,255,255,.4); color:white; }
+  .hero-ctas .btn-outline:hover { background:rgba(255,255,255,.12); }
+
+  .typewriter { display:inline; }
+  .cursor { animation:blink 1s step-end infinite; }
+  @keyframes blink { from,to{opacity:1} 50%{opacity:0} }
+
+  section { padding:5rem 2rem; }
+  .container { max-width:1100px; margin:0 auto; }
+  .section-tag { display:inline-block; font-size:.75rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--indigo); background:var(--bg-ter); padding:.3rem .9rem; border-radius:100px; margin-bottom:1rem; }
+  .section-title { font-family:'Playfair Display',serif; font-size:clamp(1.75rem,4vw,2.5rem); font-weight:700; color:var(--text); line-height:1.2; margin-bottom:1rem; }
+  .section-sub { color:var(--text-sec); font-size:1.05rem; line-height:1.7; max-width:560px; }
+
+  .card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:1.5rem; transition:all .2s; }
+  .card:hover { border-color:var(--border-hover); transform:translateY(-2px); box-shadow:0 8px 24px rgba(79,70,229,.1); }
+  .card-grid { display:grid; gap:1.25rem; }
+  .card-grid-2 { grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+  .card-grid-3 { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .card-grid-4 { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+
+  .feature-icon { width:48px; height:48px; border-radius:12px; background:var(--bg-ter); display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1rem; }
+  .feature-card h3 { font-size:1rem; font-weight:600; margin-bottom:.5rem; }
+  .feature-card p { font-size:.875rem; color:var(--text-sec); line-height:1.6; }
+
+  .stat-card { background:var(--bg-sec); border-radius:12px; padding:1.25rem; border:1px solid var(--border); }
+  .stat-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:.25rem; }
+  .stat-value { font-size:1.75rem; font-weight:700; color:var(--text); }
+  .stat-change { font-size:.75rem; margin-top:.25rem; }
+  .stat-up { color:var(--success); }
+  .stat-down { color:var(--danger); }
+
+  .form-group { margin-bottom:1.25rem; }
+  .form-label { display:block; font-size:.875rem; font-weight:500; margin-bottom:.4rem; color:var(--text-sec); }
+  .form-input,.form-select,.form-textarea { width:100%; padding:.65rem 1rem; border-radius:10px; border:1px solid var(--border-hover); background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:.9rem; transition:all .2s; outline:none; }
+  .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--indigo); box-shadow:0 0 0 3px rgba(79,70,229,.12); }
+  .form-input.error { border-color:var(--danger); }
+  .form-error { font-size:.75rem; color:var(--danger); margin-top:.25rem; }
+  .form-textarea { resize:vertical; min-height:100px; }
+  .form-hint { font-size:.75rem; color:var(--text-muted); margin-top:.25rem; }
+
+  #toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.5rem; }
+  .toast { padding:.75rem 1.25rem; border-radius:10px; font-size:.875rem; font-weight:500; display:flex; align-items:center; gap:.5rem; animation:slideIn .3s ease; min-width:250px; backdrop-filter:blur(12px); }
+  @keyframes slideIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+  .toast-success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+  .toast-error { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+  .toast-info { background:var(--bg-ter); color:var(--indigo); border:1px solid var(--border-hover); }
+
+  .dash-layout { display:flex; gap:0; min-height:calc(100vh - 64px); }
+  .sidebar { width:240px; flex-shrink:0; background:var(--bg-sec); border-right:1px solid var(--border); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.25rem; }
+  .sidebar-title { font-size:.7rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:.5rem .75rem; margin-top:1rem; }
+  .sidebar-link { display:flex; align-items:center; gap:.75rem; padding:.6rem .75rem; border-radius:8px; font-size:.875rem; font-weight:500; color:var(--text-sec); cursor:pointer; border:none; background:none; width:100%; text-align:left; transition:all .15s; }
+  .sidebar-link:hover { background:var(--bg-ter); color:var(--text); }
+  .sidebar-link.active { background:var(--bg-ter); color:var(--indigo); }
+  .sidebar-link .icon { font-size:1rem; width:20px; text-align:center; }
+  .dash-main { flex:1; padding:2rem; overflow-y:auto; }
+  .dash-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+  .dash-title { font-family:'Playfair Display',serif; font-size:1.75rem; font-weight:700; }
+  .dash-sub { color:var(--text-sec); font-size:.9rem; margin-top:.2rem; }
+
+  .vendor-card { display:flex; flex-direction:column; gap:.75rem; }
+  .vendor-avatar { width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,var(--indigo),var(--purple)); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.1rem; flex-shrink:0; }
+  .vendor-info h4 { font-size:.95rem; font-weight:600; }
+  .vendor-info p { font-size:.8rem; color:var(--text-sec); }
+  .vendor-tags { display:flex; gap:.4rem; flex-wrap:wrap; }
+  .tag { font-size:.7rem; font-weight:600; padding:.2rem .6rem; border-radius:100px; background:var(--bg-ter); color:var(--indigo); border:1px solid var(--border); }
+  .rating { display:flex; align-items:center; gap:.3rem; font-size:.8rem; color:var(--text-sec); }
+  .stars { color:#f59e0b; font-size:.75rem; }
+
+  table { width:100%; border-collapse:collapse; }
+  th { font-size:.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em; padding:.75rem 1rem; background:var(--bg-sec); border-bottom:1px solid var(--border); text-align:left; }
+  td { padding:.85rem 1rem; border-bottom:1px solid var(--border); font-size:.875rem; }
+  tr:hover td { background:var(--bg-sec); }
+  .badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.7rem; font-weight:600; padding:.2rem .6rem; border-radius:100px; }
+  .badge-success { background:#d1fae5; color:#065f46; }
+  .badge-warning { background:#fef3c7; color:#92400e; }
+  .badge-danger { background:#fee2e2; color:#991b1b; }
+  .badge-info { background:var(--bg-ter); color:var(--indigo); }
+
+  .progress { background:var(--bg-ter); border-radius:100px; height:8px; overflow:hidden; }
+  .progress-bar { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--indigo),var(--purple)); transition:width .4s ease; }
+
+  .budget-track { margin:.75rem 0; }
+  .budget-track-label { display:flex; justify-content:space-between; font-size:.8rem; color:var(--text-muted); margin-bottom:.4rem; }
+  .budget-bar { background:var(--bg-ter); border-radius:100px; height:10px; overflow:hidden; }
+  .budget-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--indigo),var(--purple)); transition:width .6s ease; }
+  .budget-warn { background:linear-gradient(90deg,#f59e0b,#ef4444); }
+  .budget-ok   { background:linear-gradient(90deg,var(--indigo),var(--purple)); }
+
+  .role-card { border:2px solid var(--border); border-radius:14px; padding:1.25rem; text-align:center; cursor:pointer; transition:all .2s; }
+  .role-card:hover { border-color:var(--indigo); background:var(--bg-ter); }
+  .role-card.selected { border-color:var(--indigo); background:var(--bg-ter); box-shadow:0 0 0 3px rgba(79,70,229,.15); }
+  .role-icon { font-size:2rem; margin-bottom:.5rem; }
+  .role-card h4 { font-size:.95rem; font-weight:700; margin-bottom:.2rem; }
+  .role-card p { font-size:.75rem; color:var(--text-muted); }
+
+  .pwd-meter { display:flex; gap:4px; margin-top:.4rem; }
+  .pwd-seg { flex:1; height:4px; border-radius:4px; background:var(--bg-ter); transition:background .3s; }
+  .pwd-label { font-size:.72rem; color:var(--text-muted); margin-top:.25rem; }
+
+  .filter-chips { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .chip { padding:.3rem .8rem; border-radius:100px; font-size:.78rem; font-weight:500; border:1px solid var(--border-hover); color:var(--text-sec); cursor:pointer; transition:all .15s; user-select:none; }
+  .chip:hover { border-color:var(--indigo); color:var(--indigo); }
+  .chip.active { background:var(--indigo); color:white; border-color:var(--indigo); }
+
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:500; align-items:center; justify-content:center; padding:1rem; }
+  .modal-overlay.open { display:flex; animation:fadeIn .2s ease; }
+  .modal { background:var(--card-bg); border-radius:20px; padding:2rem; max-width:520px; width:100%; max-height:90vh; overflow-y:auto; position:relative; border:1px solid var(--border); }
+  .modal-close { position:absolute; top:1rem; right:1rem; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-muted); width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; transition:background .2s; }
+  .modal-close:hover { background:var(--bg-sec); }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; margin-bottom:1.25rem; }
+
+  .gradient-text { background:linear-gradient(135deg,var(--indigo),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .divider { border:none; border-top:1px solid var(--border); margin:1.25rem 0; }
+  .flex { display:flex; }
+  .items-center { align-items:center; }
+  .justify-between { justify-content:space-between; }
+  .gap-1 { gap:.5rem; }
+  .gap-2 { gap:1rem; }
+  .mb-1 { margin-bottom:.5rem; }
+  .mb-2 { margin-bottom:1rem; }
+  .mt-2 { margin-top:1rem; }
+  .text-sm { font-size:.875rem; }
+  .text-xs { font-size:.75rem; }
+  .text-muted { color:var(--text-muted); }
+  .font-600 { font-weight:600; }
+
+  .schedule-timeline { display:flex; flex-direction:column; gap:0; }
+  .schedule-item { display:flex; align-items:flex-start; gap:1rem; padding:.75rem 0; border-bottom:1px solid var(--border); }
+  .schedule-time { font-size:.78rem; font-weight:600; color:var(--text-muted); width:64px; flex-shrink:0; padding-top:.15rem; }
+  .schedule-dot { width:10px; height:10px; border-radius:50%; background:var(--indigo); flex-shrink:0; margin-top:.3rem; }
+  .schedule-content h4 { font-size:.9rem; font-weight:600; margin-bottom:.1rem; }
+  .schedule-content p { font-size:.8rem; color:var(--text-sec); }
+
+  .empty-state { text-align:center; padding:3rem 1rem; color:var(--text-muted); }
+  .empty-state .icon { font-size:3rem; margin-bottom:1rem; }
+  .empty-state p { font-size:.9rem; }
+
+  footer { background:var(--bg-sec); border-top:1px solid var(--border); padding:2rem; text-align:center; color:var(--text-muted); font-size:.875rem; }
+  .footer-logo { font-family:'Playfair Display',serif; font-size:1.25rem; font-weight:900; background:linear-gradient(135deg,var(--indigo),var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:.5rem; }
+
+  .newsletter { background:linear-gradient(135deg,#4f46e5,#9333ea); border-radius:24px; padding:3rem 2rem; text-align:center; color:white; }
+  .newsletter h2 { font-family:'Playfair Display',serif; font-size:1.75rem; margin-bottom:.75rem; }
+  .newsletter p { opacity:.85; margin-bottom:1.5rem; }
+  .newsletter-form { display:flex; gap:.75rem; max-width:420px; margin:0 auto; }
+  .newsletter-form input { flex:1; padding:.75rem 1rem; border-radius:10px; border:2px solid rgba(255,255,255,.3); background:rgba(255,255,255,.12); color:white; font-size:.9rem; outline:none; }
+  .newsletter-form input::placeholder { color:rgba(255,255,255,.55); }
+  .newsletter-form input:focus { border-color:rgba(255,255,255,.6); }
+
+  .absa-panel { margin-top:1rem; padding:.9rem 1rem; background:var(--bg-sec); border-radius:10px; }
+  .absa-chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem; }
+  .absa-chip { font-size:.7rem; padding:.2rem .55rem; border-radius:100px; background:var(--bg-ter); border:1px solid var(--border); font-weight:600; }
+
+  .priority-list { display:flex; flex-direction:column; gap:.5rem; }
+  .priority-item { display:flex; align-items:center; gap:.75rem; padding:.65rem 1rem; background:var(--bg-sec); border:1px solid var(--border); border-radius:10px; cursor:grab; }
+  .priority-item:active { cursor:grabbing; opacity:.8; }
+  .priority-drag { color:var(--text-muted); font-size:.9rem; }
+  .priority-label { flex:1; font-size:.875rem; font-weight:500; }
+  .priority-badge { font-size:.7rem; background:var(--bg-ter); color:var(--indigo); padding:.15rem .5rem; border-radius:100px; border:1px solid var(--border); }
+
+  @media(max-width:768px) {
+    .dash-layout { flex-direction:column; }
+    .sidebar { width:100%; flex-direction:row; overflow-x:auto; padding:0.75rem; gap:.5rem; }
+    .sidebar-title { display:none; }
+    nav { padding:0 1rem; }
+    .nav-links { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- ── VENDOR DETAIL MODAL ── -->
+<div class="modal-overlay" id="vendorModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('vendorModal')">✕</button>
+    <div id="vendorModalContent"></div>
+    <div id="vendorModalActions" style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+<!-- ── EDIT EVENT MODAL ── -->
+<div class="modal-overlay" id="editEventModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editEventModal')">✕</button>
+    <div class="modal-title">Edit Event</div>
+    <div class="form-group">
+      <label class="form-label">Event Name</label>
+      <input type="text" class="form-input" id="eeEventName">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Event Type</label>
+      <input type="text" class="form-input" id="eeEventType" placeholder="Wedding, Birthday...">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="eeEventDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input type="text" class="form-input" id="eeEventLocation" placeholder="City, Venue">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Budget (₹)</label>
+      <input type="number" class="form-input" id="eeEventBudget" min="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" id="eeEventDesc"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Service Priorities (drag to reorder)</label>
+      <div class="priority-list" id="priorityList"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveEditEvent()" style="width:100%;justify-content:center;margin-top:.5rem;">Save Changes</button>
+  </div>
+</div>
+
+<!-- ── CREATE EVENT MODAL ── -->
+<div class="modal-overlay" id="createEventModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('createEventModal')">✕</button>
+    <div class="modal-title">Create New Event</div>
+    <div class="form-group">
+      <label class="form-label">Event Name *</label>
+      <input type="text" class="form-input" id="ceEventName" placeholder="Sanika's Wedding">
+      <div class="form-error hidden" id="ceNameErr">Event name is required</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Event Type</label>
+      <select class="form-select" id="ceEventType">
+        <option value="Wedding">Wedding</option>
+        <option value="Birthday">Birthday</option>
+        <option value="Corporate">Corporate</option>
+        <option value="Reception">Reception</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="ceEventDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input type="text" class="form-input" id="ceEventLocation" placeholder="Pune">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Budget (₹)</label>
+      <input type="number" class="form-input" id="ceEventBudget" min="0" placeholder="500000">
+    </div>
+    <button class="btn btn-primary" onclick="submitCreateEvent()" style="width:100%;justify-content:center;margin-top:.5rem;">Create Event →</button>
+  </div>
+</div>
+
+<!-- ── INVITE GUEST MODAL ── -->
+<div class="modal-overlay" id="inviteGuestModal">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('inviteGuestModal')">✕</button>
+    <div class="modal-title">Invite a Guest</div>
+    <div class="form-group">
+      <label class="form-label">Guest Name</label>
+      <input type="text" class="form-input" id="igName" placeholder="Rahul Sharma">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email *</label>
+      <input type="email" class="form-input" id="igEmail" placeholder="guest@example.com">
+      <div class="form-hint">If they have an Eventify account, they'll see this in their invites.</div>
+      <div class="form-error hidden" id="igEmailErr">Valid email required</div>
+    </div>
+    <button class="btn btn-primary" onclick="submitInviteGuest()" style="width:100%;justify-content:center;margin-top:.5rem;">Send Invite →</button>
+  </div>
+</div>
+
+<!-- ── SEND INQUIRY MODAL ── -->
+<div class="modal-overlay" id="inquiryModal">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('inquiryModal')">✕</button>
+    <div class="modal-title">Send Inquiry</div>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem;">Sending inquiry to: <strong id="inqVendorName"></strong></p>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-textarea" id="inqMessage" placeholder="Describe your event requirements..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Budget (₹)</label>
+      <input type="number" class="form-input" id="inqBudget" min="0" placeholder="80000">
+    </div>
+    <button class="btn btn-primary" onclick="submitInquiry()" style="width:100%;justify-content:center;margin-top:.5rem;">Send Inquiry →</button>
+  </div>
+</div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="nav-logo" onclick="goHome()">Eventify</div>
+  <div class="nav-links" id="navLinks">
+    <button class="nav-link active" onclick="goHome()">Home</button>
+    <button class="nav-link" onclick="showPage('features')">Features</button>
+    <button class="nav-link" onclick="showPage('vendors-public')">Vendors</button>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+    <div id="navGuest">
+      <span style="display:inline-flex;gap:.5rem;">
+        <button class="btn btn-outline btn-sm" onclick="showPage('login')">Log In</button>
+        <button class="btn btn-primary btn-sm" onclick="showPage('signup')">Get Started</button>
+      </span>
+    </div>
+    <div id="navUser" class="hidden">
+      <span style="display:inline-flex;align-items:center;gap:.75rem;">
+        <span id="navUserName" style="font-size:.875rem;font-weight:500;color:var(--text-sec);"></span>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+      </span>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ HOME ══════════ -->
+<div class="page active" id="page-home">
+  <section class="hero" style="padding:0;">
+    <div class="hero-content">
+      <div class="hero-badge">✦ Built for modern event planning</div>
+      <h1>Plan Your <em class="typewriter" id="typewriter"></em><span class="cursor">|</span><br>With Ease</h1>
+      <p>Centralised planning, smart vendor coordination, real-time RSVP tracking, and stress-free event management — all in one beautiful platform.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="showPage('signup')">Get Started — It's Free</button>
+        <button class="btn btn-outline" onclick="showPage('features')">Explore Features →</button>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:3rem;">
+        <div class="section-tag">Why Eventify</div>
+        <h2 class="section-title">Everything you need,<br>nothing you don't</h2>
+        <p class="section-sub" style="margin:0 auto;">One platform to coordinate vendors, manage guests, track budgets, and create unforgettable experiences.</p>
+      </div>
+      <div class="card-grid card-grid-3">
+        <div class="card feature-card"><div class="feature-icon">🎭</div><h3>Smart Vendor Discovery</h3><p>Browse verified caterers, photographers, decorators and more with real ABSA-powered reviews.</p></div>
+        <div class="card feature-card"><div class="feature-icon">💌</div><h3>Live RSVP Management</h3><p>Send invitations and track responses in real time. No more chasing guests for confirmations.</p></div>
+        <div class="card feature-card"><div class="feature-icon">💰</div><h3>Budget Intelligence</h3><p>Visual budget tracking with smart alerts before you overspend. Keep every rupee accounted for.</p></div>
+        <div class="card feature-card"><div class="feature-icon">🤖</div><h3>AI Sentiment Analysis</h3><p>ABSA-powered vendor ratings give you a deeper, fairer picture than a simple star score.</p></div>
+        <div class="card feature-card"><div class="feature-icon">📊</div><h3>Real-Time Analytics</h3><p>Know exactly where you stand with live dashboards for guests, budget, and vendor progress.</p></div>
+        <div class="card feature-card"><div class="feature-icon">⭐</div><h3>Post-Event Reviews</h3><p>Collect and share feedback on vendors to help the next host make an even better choice.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--bg-sec);">
+    <div class="container">
+      <div class="card-grid card-grid-4">
+        <div class="stat-card" style="text-align:center;"><div class="stat-value gradient-text">10K+</div><div class="stat-label">Events Planned</div></div>
+        <div class="stat-card" style="text-align:center;"><div class="stat-value gradient-text">127</div><div class="stat-label">Verified Vendors</div></div>
+        <div class="stat-card" style="text-align:center;"><div class="stat-value gradient-text">4.8★</div><div class="stat-label">Average Rating</div></div>
+        <div class="stat-card" style="text-align:center;"><div class="stat-value gradient-text">₹2.4Cr</div><div class="stat-label">Budget Managed</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background:var(--bg);">
+    <div class="container">
+      <div class="newsletter">
+        <h2>Stay in the loop</h2>
+        <p>Get planning tips, vendor spotlights, and platform updates straight to your inbox.</p>
+        <div class="newsletter-form">
+          <input type="email" placeholder="your@email.com">
+          <button class="btn btn-primary" onclick="showToast('Subscribed! Thanks.','success')">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer><div class="footer-logo">Eventify</div><p>© Eventify 2026 — Plan better. Celebrate more.</p></footer>
+</div>
+
+<!-- ══════════ FEATURES ══════════ -->
+<div class="page" id="page-features">
+  <section style="min-height:calc(100vh - 64px);padding:4rem 2rem;">
+    <div class="container">
+      <div class="section-tag">Platform Features</div>
+      <h2 class="section-title">Built for modern event planning</h2>
+      <div class="card-grid card-grid-2" style="margin-top:2rem;">
+        <div class="card"><h3 style="font-weight:700;margin-bottom:.5rem;">Host Dashboard</h3><p style="color:var(--text-sec);font-size:.9rem;line-height:1.7;">Create events, invite guests, track RSVPs, manage budgets, discover vendors with ABSA scores, and customise your event priorities all in one place.</p></div>
+        <div class="card"><h3 style="font-weight:700;margin-bottom:.5rem;">Attendee Portal</h3><p style="color:var(--text-sec);font-size:.9rem;line-height:1.7;">Accept or decline invitations, view your upcoming event schedule, and submit ABSA-powered reviews for vendors after the event.</p></div>
+        <div class="card"><h3 style="font-weight:700;margin-bottom:.5rem;">Vendor Portal</h3><p style="color:var(--text-sec);font-size:.9rem;line-height:1.7;">Set up your business profile, manage incoming host inquiries, and read sentiment-analysed reviews of your services broken down by aspect.</p></div>
+        <div class="card"><h3 style="font-weight:700;margin-bottom:.5rem;">ABSA Engine</h3><p style="color:var(--text-sec);font-size:.9rem;line-height:1.7;">Aspect-Based Sentiment Analysis breaks every review into quality, service, value, reliability, ambiance, and experience — giving you the full picture.</p></div>
+      </div>
+      <div style="margin-top:2rem;text-align:center;">
+        <button class="btn btn-primary" onclick="showPage('signup')">Get Started — It's Free</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ PUBLIC VENDORS ══════════ -->
+<div class="page" id="page-vendors-public">
+  <section style="min-height:calc(100vh - 64px);padding:3rem 2rem;">
+    <div class="container">
+      <div style="margin-bottom:2rem;">
+        <div class="section-tag">Vendor Directory</div>
+        <h2 class="section-title">Find the right vendor for your event</h2>
+      </div>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <input type="text" class="form-input" id="pubVendorSearch" placeholder="Search vendors..." style="max-width:260px;" oninput="loadPublicVendors()">
+        <select class="form-select" id="pubVendorCat" style="max-width:180px;" onchange="loadPublicVendors()">
+          <option value="">All Categories</option>
+          <option>catering</option><option>photography</option><option>decoration</option>
+          <option>entertainment</option><option>venue</option>
+        </select>
+      </div>
+      <div class="card-grid card-grid-3" id="pubVendorGrid">
+        <div class="empty-state"><div class="icon">🔍</div><p>Loading vendors...</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div class="page" id="page-login">
+  <section style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;background:var(--bg-sec);">
+    <div style="width:100%;max-width:420px;padding:1rem;">
+      <div class="card" style="padding:2.5rem;">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div class="nav-logo" style="font-size:1.75rem;">Eventify</div>
+          <p style="color:var(--text-sec);margin-top:.5rem;font-size:.9rem;">Welcome back — sign in to continue</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com">
+          <div class="form-error hidden" id="loginEmailErr">Please enter a valid email</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+          <div class="form-error hidden" id="loginPwdErr">Password is required</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login as</label>
+          <select class="form-select" id="loginRole">
+            <option value="">Select role...</option>
+            <option value="host">Event Host</option>
+            <option value="attendee">Attendee</option>
+            <option value="vendor">Vendor</option>
+          </select>
+          <div class="form-error hidden" id="loginRoleErr">Please select a role</div>
+        </div>
+        <div class="form-error hidden" id="loginServerErr" style="margin-bottom:.75rem;"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">Sign In →</button>
+        <hr class="divider">
+        <p style="text-align:center;font-size:.85rem;color:var(--text-muted);">New to Eventify? <button class="btn btn-ghost btn-sm" onclick="showPage('signup')" style="padding:0;color:var(--indigo);">Create an account</button></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ SIGNUP ══════════ -->
+<div class="page" id="page-signup">
+  <section style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;background:var(--bg-sec);padding:2rem;">
+    <div style="width:100%;max-width:520px;">
+      <div class="card" style="padding:2.5rem;">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <div class="nav-logo" style="font-size:1.75rem;">Eventify</div>
+          <p style="color:var(--text-sec);margin-top:.5rem;font-size:.9rem;">Create your account and start planning</p>
+        </div>
+        <p style="font-size:.85rem;font-weight:600;margin-bottom:.75rem;color:var(--text-sec);">I am a...</p>
+        <div class="card-grid card-grid-3" style="margin-bottom:1.5rem;">
+          <div class="role-card" onclick="selectRole('host',this)"><div class="role-icon">🎪</div><h4>Host</h4><p>Organize events and hire vendors</p></div>
+          <div class="role-card" onclick="selectRole('attendee',this)"><div class="role-icon">🎟️</div><h4>Attendee</h4><p>RSVP and view events</p></div>
+          <div class="role-card" onclick="selectRole('vendor',this)"><div class="role-icon">🍽️</div><h4>Vendor</h4><p>Offer services to hosts</p></div>
+        </div>
+        <input type="hidden" id="signupRole">
+        <div class="form-error hidden" id="signupRoleErr" style="margin-bottom:.75rem;">Please select a role to continue</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input type="text" class="form-input" id="signupFirst" placeholder="Roshni">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last name</label>
+            <input type="text" class="form-input" id="signupLast" placeholder="Patel">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com">
+          <div class="form-error hidden" id="signupEmailErr">Invalid email format</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="signupPwd" placeholder="Create a strong password" oninput="updatePwdStrength(this.value)">
+          <div class="pwd-meter"><div class="pwd-seg" id="ps1"></div><div class="pwd-seg" id="ps2"></div><div class="pwd-seg" id="ps3"></div><div class="pwd-seg" id="ps4"></div></div>
+          <div class="pwd-label" id="pwdLabel">Enter a password</div>
+        </div>
+        <div class="form-error hidden" id="signupServerErr" style="margin-bottom:.75rem;"></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doSignup()">Create Account →</button>
+        <hr class="divider">
+        <p style="text-align:center;font-size:.85rem;color:var(--text-muted);">Already have an account? <button class="btn btn-ghost btn-sm" onclick="showPage('login')" style="padding:0;color:var(--indigo);">Sign in</button></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ HOST DASHBOARD ══════════ -->
+<div class="page" id="page-host">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <button class="sidebar-link active" id="hLink-overview" onclick="switchHostTab('overview',this)"><span class="icon">📊</span> Overview</button>
+      <button class="sidebar-link" id="hLink-vendors" onclick="switchHostTab('vendors',this)"><span class="icon">🍽️</span> Vendors</button>
+      <button class="sidebar-link" id="hLink-budget" onclick="switchHostTab('budget',this)"><span class="icon">💰</span> Budget</button>
+      <button class="sidebar-link" id="hLink-guestlist" onclick="switchHostTab('guestlist',this)"><span class="icon">👥</span> Guest List</button>
+      <span class="sidebar-title">Account</span>
+      <button class="sidebar-link" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</button>
+    </aside>
+
+    <main class="dash-main">
+      <!-- OVERVIEW -->
+      <div id="htab-overview">
+        <div class="dash-header">
+          <div>
+            <h1 class="dash-title" id="hostGreeting">Good morning ✨</h1>
+            <p class="dash-sub" id="hostEventSub">Loading your event...</p>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="openCreateEvent()">+ New Event</button>
+            <button class="btn btn-primary btn-sm" onclick="openEditEvent()">⚙ Edit Event</button>
+          </div>
+        </div>
+        <!-- Event selector if multiple events -->
+        <div id="eventSelectorWrap" class="hidden" style="margin-bottom:1.5rem;">
+          <label class="form-label">Your Events</label>
+          <select class="form-select" id="eventSelector" onchange="switchActiveEvent(this.value)" style="max-width:380px;"></select>
+        </div>
+        <div class="card-grid card-grid-4" style="margin-bottom:1.5rem;">
+          <div class="stat-card"><div class="stat-label">Guests Confirmed</div><div class="stat-value" id="statGuests">--</div><div class="stat-change stat-up" id="statGuestsSub"></div></div>
+          <div class="stat-card"><div class="stat-label">Vendors Booked</div><div class="stat-value" id="statVendors">--</div><div class="stat-change" style="color:var(--text-muted);" id="statVendorsSub"></div></div>
+          <div class="stat-card"><div class="stat-label">Budget Used</div><div class="stat-value" id="statBudgetPct">--</div><div class="stat-change stat-up" id="statBudgetSub"></div></div>
+          <div class="stat-card"><div class="stat-label">Days to Event</div><div class="stat-value" id="statDays">--</div><div class="stat-change stat-up" id="statDaysSub"></div></div>
+        </div>
+        <div class="card mb-2">
+          <div class="flex justify-between items-center mb-2">
+            <h3 style="font-size:.95rem;font-weight:600;">Budget Overview</h3>
+            <span class="badge badge-info" id="budgetRemaining">--</span>
+          </div>
+          <div class="budget-track">
+            <div class="budget-track-label">
+              <span id="budgetSpentLabel">Spent: --</span>
+              <span style="color:var(--text-muted);" id="budgetTotalLabel">Total: --</span>
+            </div>
+            <div class="budget-bar">
+              <div class="budget-fill budget-ok" id="budgetFill" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:.95rem;font-weight:600;margin-bottom:.75rem;">Booked Vendors</h3>
+          <div id="overviewBookings"><div class="empty-state"><div class="icon">📋</div><p>No vendors booked yet. Visit the Vendors tab to get started.</p></div></div>
+        </div>
+      </div>
+
+      <!-- VENDORS TAB -->
+      <div id="htab-vendors" class="hidden">
+        <div class="dash-header">
+          <h1 class="dash-title">Discover Vendors</h1>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+            <input type="text" class="form-input" id="hVendorSearch" placeholder="Search..." style="max-width:200px;" oninput="loadHostVendors()">
+            <select class="form-select" id="hVendorCat" style="max-width:160px;" onchange="loadHostVendors()">
+              <option value="">All Categories</option>
+              <option>catering</option><option>photography</option><option>decoration</option>
+              <option>entertainment</option><option>venue</option>
+            </select>
+          </div>
+        </div>
+        <div class="card-grid card-grid-3" id="hostVendorGrid">
+          <div class="empty-state"><div class="icon">🔍</div><p>Loading vendors...</p></div>
+        </div>
+      </div>
+
+      <!-- BUDGET TAB -->
+      <div id="htab-budget" class="hidden">
+        <div class="dash-header">
+          <h1 class="dash-title">Budget Planner</h1>
+          <button class="btn btn-primary btn-sm" onclick="openModal('editEventModal');populateEditModal()">Set Total Budget</button>
+        </div>
+        <div id="budgetTabContent">
+          
+          <div class="card mb-2" style="margin-bottom:1.25rem; border-color: var(--indigo); background: var(--bg-ter);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <h3 style="font-size:.95rem;font-weight:700; color:var(--indigo);">✨ AI Vendor Recommendations</h3>
+                <p style="font-size:.8rem; color:var(--text-sec);">Get automated budget allocations based on your priorities and ABSA vendor scores.</p>
+              </div>
+              <button class="btn btn-primary" onclick="getBudgetRecommendations()">Generate Plan</button>
+            </div>
+            <div id="recommendationResults" class="hidden" style="background:var(--bg); border-radius:10px; padding:1rem; border:1px solid var(--border);"></div>
+          </div>
+
+          <div class="card mb-2" style="margin-bottom:1.25rem;">
+            <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem;">Spending Breakdown</h3>
+            <div id="budgetBreakdown"><div class="empty-state"><p>No bookings yet.</p></div></div>
+          </div>
+          <div class="card">
+            <h3 style="font-size:.95rem;font-weight:600;margin-bottom:1rem;">Add Expense</h3>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.75rem;align-items:end;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Vendor</label>
+                <select class="form-select" id="expVendor"><option value="">Select vendor...</option></select>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Category</label>
+                <input type="text" class="form-input" id="expCat" placeholder="catering">
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Amount (₹)</label>
+                <input type="number" class="form-input" id="expAmount" min="0">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addExpense()" style="height:40px;">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUEST LIST TAB -->
+      <div id="htab-guestlist" class="hidden">
+        <div class="dash-header">
+          <h1 class="dash-title">Guest List</h1>
+          <button class="btn btn-primary btn-sm" onclick="openModal('inviteGuestModal')">+ Invite Guest</button>
+        </div>
+        <div class="card" style="margin-bottom:1.25rem;padding:1rem 1.25rem;">
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+            <span><span class="badge badge-success">Accepted</span> <strong id="guestAccepted">0</strong></span>
+            <span><span class="badge badge-warning">Pending</span> <strong id="guestPending">0</strong></span>
+            <span><span class="badge badge-danger">Declined</span> <strong id="guestDeclined">0</strong></span>
+          </div>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>RSVP Status</th><th>Invited</th><th>Action</th></tr></thead>
+            <tbody id="guestTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No guests yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ ATTENDEE DASHBOARD ══════════ -->
+<div class="page" id="page-attendee">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <button class="sidebar-link active" id="aLink-rsvp" onclick="switchAttendeeTab('rsvp',this)"><span class="icon">💌</span> My Invites</button>
+      <button class="sidebar-link" id="aLink-schedule" onclick="switchAttendeeTab('schedule',this)"><span class="icon">📅</span> My Schedule</button>
+      <button class="sidebar-link" id="aLink-rate" onclick="switchAttendeeTab('rate',this)"><span class="icon">⭐</span> Rate Vendors</button>
+      <span class="sidebar-title">Account</span>
+      <button class="sidebar-link" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</button>
+    </aside>
+
+    <main class="dash-main">
+      <!-- INVITES -->
+      <div id="atab-rsvp">
+        <div class="dash-header">
+          <div>
+            <h1 class="dash-title" id="attendeeGreeting">Welcome back!</h1>
+            <p class="dash-sub">Your event invitations</p>
+          </div>
+        </div>
+        <div id="invitesList"><div class="empty-state"><div class="icon">💌</div><p>No invitations yet.</p></div></div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div id="atab-schedule" class="hidden">
+        <div class="dash-header"><h1 class="dash-title">My Schedule</h1></div>
+        <div id="scheduleList"><div class="empty-state"><div class="icon">📅</div><p>No upcoming events. Accept some invitations first!</p></div></div>
+      </div>
+
+      <!-- RATE VENDORS -->
+      <div id="atab-rate" class="hidden">
+        <div style="max-width: 520px; margin: 0 auto;">
+          <div class="dash-header"><h1 class="dash-title">Rate Vendors</h1></div>
+          <div class="card">
+            <p class="text-sm text-muted mb-2">Your feedback is analysed with ABSA sentiment analysis to give vendors fair, aspect-by-aspect scores.</p>
+            <div class="form-group">
+              <label class="form-label">Select Vendor</label>
+              <select class="form-select" id="rateVendorSel"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Overall Rating</label>
+              <select class="form-select" id="rateOverall">
+                <option value="5">★★★★★ Excellent (5)</option>
+                <option value="4">★★★★ Good (4)</option>
+                <option value="3">★★★ Average (3)</option>
+                <option value="2">★★ Below Average (2)</option>
+                <option value="1">★ Poor (1)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Write a review *</label>
+              <textarea class="form-textarea" id="ratingReview" placeholder="Share your experience in detail — mention food, service, punctuality, ambiance..."></textarea>
+              <div class="form-error hidden" id="ratingErr">Please write a review (min 20 characters)</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitRating()">Submit Review →</button>
+            <div id="absaPanel" class="hidden absa-panel" style="margin-top:1rem;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ VENDOR DASHBOARD ══════════ -->
+<div class="page" id="page-vendor">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <button class="sidebar-link active" id="vLink-profile" onclick="switchVendorTab('profile',this)"><span class="icon">🏪</span> My Profile</button>
+      <button class="sidebar-link" id="vLink-inquiries" onclick="switchVendorTab('inquiries',this)"><span class="icon">📩</span> Inquiries</button>
+      <button class="sidebar-link" id="vLink-reviews" onclick="switchVendorTab('reviews',this)"><span class="icon">⭐</span> Reviews</button>
+      <span class="sidebar-title">Account</span>
+      <button class="sidebar-link" onclick="doLogout()"><span class="icon">🚪</span> Sign Out</button>
+    </aside>
+
+    <main class="dash-main">
+      <!-- PROFILE -->
+      <div id="vtab-profile">
+        <div style="max-width: 580px; margin: 0 auto;">
+          <div class="dash-header"><h1 class="dash-title">Vendor Profile</h1></div>
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label">Business Name *</label>
+              <input type="text" class="form-input" id="vBizName" placeholder="Your business name">
+              <div class="form-error hidden" id="vBizErr">Business name is required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="vCategory">
+                <option value="catering">Catering</option>
+                <option value="photography">Photography</option>
+                <option value="decoration">Decoration</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="venue">Venue</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tags (comma separated)</label>
+              <input type="text" class="form-input" id="vTags" placeholder="Veg, Non-Veg, Live Counter">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+              <div class="form-group">
+                <label class="form-label">Min Price (₹)</label>
+                <input type="number" class="form-input" id="vMinPrice" placeholder="300">
+                <div class="form-error hidden" id="vPriceErr">Enter a valid amount</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Max Price (₹)</label>
+                <input type="number" class="form-input" id="vMaxPrice" placeholder="1000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone *</label>
+              <input type="tel" class="form-input" id="vPhone" placeholder="+91 98765 43210">
+              <div class="form-error hidden" id="vPhoneErr">Enter a valid phone number</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <input type="text" class="form-input" id="vCity" placeholder="Pune">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea class="form-textarea" id="vDesc" placeholder="Describe your services..."></textarea>
+            </div>
+            <div id="vendorAbsaStats" class="hidden" style="background:var(--bg-sec);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+              <p style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.75rem;">Your ABSA Scores</p>
+              <div class="card-grid card-grid-3" id="vendorAbsaGrid"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveVendorProfile()" style="width:100%;justify-content:center;">Save Profile</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- INQUIRIES -->
+      <div id="vtab-inquiries" class="hidden">
+        <div class="dash-header"><h1 class="dash-title">Host Inquiries</h1></div>
+        <div id="inquiriesList"><div class="empty-state"><div class="icon">📩</div><p>No inquiries yet.</p></div></div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div id="vtab-reviews" class="hidden">
+        <div class="dash-header"><h1 class="dash-title">My Reviews</h1></div>
+        <div id="vendorReviewsList"><div class="empty-state"><div class="icon">⭐</div><p>No reviews yet.</p></div></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+const API = '/api';
+let currentUser = null;
+let activeEventId = null;
+let hostEvents = [];
+let allVendors = [];
+let activeInquiryVendorId = null;
+
+// ── THEME ──
+function toggleTheme() {
+  const d = document.documentElement;
+  const dark = d.getAttribute('data-theme') === 'dark';
+  d.setAttribute('data-theme', dark ? '' : 'dark');
+  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+}
+
+// ── TOAST ──
+function showToast(msg, type = 'info') {
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  t.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── PAGE ROUTING ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) { pg.classList.add('active'); window.scrollTo(0, 0); }
+  if (id === 'vendors-public') loadPublicVendors();
+}
+
+function goHome() {
+  if (!currentUser) { showPage('home'); return; }
+  if (currentUser.role === 'host')     showPage('host');
+  else if (currentUser.role === 'attendee') showPage('attendee');
+  else showPage('vendor');
+}
+
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
+  const role  = document.getElementById('loginRole').value;
+  let ok = true;
+  showHide('loginEmailErr', !email.includes('@'));  if (!email.includes('@')) ok = false;
+  showHide('loginPwdErr',   !pwd);                  if (!pwd) ok = false;
+  showHide('loginRoleErr',  !role);                 if (!role) ok = false;
+  if (!ok) return;
+  showHide('loginServerErr', false);
+  try {
+    const res = await api('/auth/login', 'POST', { email, password: pwd, role });
+    currentUser = res.user;
+    afterLogin();
+  } catch(e) {
+    document.getElementById('loginServerErr').textContent = e.message || 'Login failed';
+    showHide('loginServerErr', true);
+  }
+}
+
+async function doSignup() {
+  const role  = document.getElementById('signupRole').value;
+  const first = document.getElementById('signupFirst').value.trim();
+  const last  = document.getElementById('signupLast').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pwd   = document.getElementById('signupPwd').value;
+  let ok = true;
+  showHide('signupRoleErr',  !role);   if (!role)  ok = false;
+  showHide('signupEmailErr', !email.includes('@')); if (!email.includes('@')) ok = false;
+  if (!ok) return;
+  showHide('signupServerErr', false);
+  try {
+    const res = await api('/auth/signup', 'POST', { first_name: first, last_name: last, email, password: pwd, role });
+    currentUser = res.user;
+    afterLogin();
+  } catch(e) {
+    document.getElementById('signupServerErr').textContent = e.message || 'Signup failed';
+    showHide('signupServerErr', true);
+  }
+}
+
+async function doLogout() {
+    try {
+        // Try to securely kill the server-side session
+        await api('/logout', 'POST'); 
+    } catch (e) {
+        console.warn("Backend logout failed, but clearing local state anyway.");
+    }
+
+    // Completely wipe all browser storage so nothing leaks
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // THE FIX: Explicitly boot the user back to the home/login screen
+    window.location.href = '/'; 
+}
+
+function afterLogin() {
+  document.getElementById('navGuest').classList.add('hidden');
+  document.getElementById('navUser').classList.remove('hidden');
+  document.getElementById('navUserName').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+  if (currentUser.role === 'host') {
+    showPage('host');
+    loadHostDashboard();
+  } else if (currentUser.role === 'attendee') {
+    showPage('attendee');
+    loadAttendeeDashboard();
+  } else {
+    showPage('vendor');
+    loadVendorDashboard();
+  }
+}
+
+// ── API HELPER ──
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, credentials: 'include', headers: {} };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const res = await fetch(API + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── HELPERS ──
+function showHide(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden', !show);
+}
+function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+
+function starsHtml(rating) {
+  const full  = Math.round(rating);
+  return '★'.repeat(Math.max(0, full)) + '☆'.repeat(Math.max(0, 5 - full));
+}
+
+function rsvpBadge(s) {
+  const m = { accepted: 'badge-success', pending: 'badge-warning', declined: 'badge-danger' };
+  return `<span class="badge ${m[s] || 'badge-info'}">${s}</span>`;
+}
+
+function fmtMoney(n) {
+  if (!n) return '₹0';
+  return '₹' + Number(n).toLocaleString('en-IN');
+}
+
+// ── PASSWORD STRENGTH ──
+function updatePwdStrength(v) {
+  let score = 0;
+  if (v.length >= 8) score++;
+  if (/[A-Z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#059669'];
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('ps' + i).style.background = i <= score ? colors[score] : 'var(--bg-ter)';
+  }
+  document.getElementById('pwdLabel').textContent = v ? labels[score] || 'Very weak' : 'Enter a password';
+}
+
+function selectRole(role, el) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('signupRole').value = role;
+  showHide('signupRoleErr', false);
+}
+
+// ── TYPEWRITER ──
+(function() {
+  const words = ['Wedding', 'Birthday Party', 'Corporate Event', 'Reception', 'Celebration'];
+  let wi = 0, ci = 0, deleting = false;
+  function tick() {
+    const el = document.getElementById('typewriter');
+    if (!el) return;
+    const word = words[wi % words.length];
+    if (!deleting) {
+      el.textContent = word.slice(0, ++ci);
+      if (ci === word.length) { deleting = true; setTimeout(tick, 1800); return; }
+    } else {
+      el.textContent = word.slice(0, --ci);
+      if (ci === 0) { deleting = false; wi++; }
+    }
+    setTimeout(tick, deleting ? 60 : 110);
+  }
+  tick();
+})();
+
+// ══════════════════════════════
+// HOST DASHBOARD
+// ══════════════════════════════
+
+async function loadHostDashboard() {
+  try {
+    hostEvents = await api('/events');
+  } catch(e) { showToast('Could not load events', 'error'); return; }
+
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('hostGreeting').textContent = `${greet}, ${currentUser.first_name} ✨`;
+
+  if (hostEvents.length === 0) {
+    document.getElementById('hostEventSub').textContent = 'No events yet. Create your first event!';
+    clearStats();
+    return;
+  }
+
+  // Populate event selector
+  const sel = document.getElementById('eventSelector');
+  sel.innerHTML = hostEvents.map(e => `<option value="${e.id}">${e.name} — ${e.event_date || 'No date'}</option>`).join('');
+  showHide('eventSelectorWrap', hostEvents.length > 1);
+
+  activeEventId = hostEvents[0].id;
+  await refreshHostStats();
+  loadVendorsForExpenseDropdown();
+}
+
+async function switchActiveEvent(eid) {
+  activeEventId = parseInt(eid);
+  await refreshHostStats();
+  if (document.getElementById('htab-guestlist') && !document.getElementById('htab-guestlist').classList.contains('hidden')) {
+    loadGuestList();
+  }
+  if (document.getElementById('htab-budget') && !document.getElementById('htab-budget').classList.contains('hidden')) {
+    loadBudgetTab();
+  }
+}
+
+async function refreshHostStats() {
+  if (!activeEventId) return;
+  const evt = hostEvents.find(e => e.id === activeEventId);
+  if (evt) {
+    document.getElementById('hostEventSub').textContent =
+      `${evt.name}${evt.event_date ? ' — ' + evt.event_date : ''}${evt.location ? ' · ' + evt.location : ''}`;
+  }
+  try {
+    const s = await api(`/events/${activeEventId}/stats`);
+    document.getElementById('statGuests').textContent   = s.guests_confirmed;
+    document.getElementById('statGuestsSub').textContent = `of ${s.guests_total} invited`;
+    document.getElementById('statVendors').textContent  = s.vendors_booked;
+    document.getElementById('statBudgetPct').textContent = s.budget_pct + '%';
+    document.getElementById('statBudgetSub').textContent = `${fmtMoney(s.spent_budget)} / ${fmtMoney(s.total_budget)}`;
+    document.getElementById('statDays').textContent     = s.days_left !== null ? s.days_left : '--';
+    document.getElementById('statDaysSub').textContent  = s.days_left !== null ? (s.days_left >= 0 ? 'days remaining' : 'days ago') : '';
+    document.getElementById('budgetRemaining').textContent = `${fmtMoney(s.total_budget - s.spent_budget)} remaining`;
+    document.getElementById('budgetSpentLabel').textContent = `Spent: ${fmtMoney(s.spent_budget)}`;
+    document.getElementById('budgetTotalLabel').textContent = `Total: ${fmtMoney(s.total_budget)}`;
+    const pct = Math.min(s.budget_pct, 100);
+    const fill = document.getElementById('budgetFill');
+    fill.style.width = pct + '%';
+    fill.className = 'budget-fill ' + (pct >= 80 ? 'budget-warn' : 'budget-ok');
+    loadOverviewBookings();
+  } catch(e) { /* silently ignore */ }
+}
+
+function clearStats() {
+  ['statGuests','statVendors','statBudgetPct','statDays'].forEach(id => {
+    document.getElementById(id).textContent = '--';
+  });
+}
+
+async function loadOverviewBookings() {
+  if (!activeEventId) return;
+  try {
+    const bookings = await api(`/events/${activeEventId}/bookings`);
+    const el = document.getElementById('overviewBookings');
+    if (!bookings.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No vendors booked yet.</p></div>';
+      return;
+    }
+    el.innerHTML = `<div class="card-grid card-grid-3">` + bookings.map(b => `
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:var(--bg-sec);border-radius:10px;border:1px solid var(--border);">
+        <div class="vendor-avatar" style="width:36px;height:36px;font-size:.85rem;">${(b.vendor_name||'?')[0]}</div>
+        <div style="flex:1;">
+          <div style="font-size:.85rem;font-weight:600;">${b.vendor_name}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">${b.category} · ${fmtMoney(b.amount)}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="padding:.2rem .4rem;color:var(--danger);" onclick="removeBooking(${b.id})">✕</button>
+      </div>`).join('') + '</div>';
+  } catch(e) {}
+}
+
+function switchHostTab(tab, el) {
+  ['overview','vendors','budget','guestlist'].forEach(t => {
+    showHide(`htab-${t}`, t === tab);
+  });
+  document.querySelectorAll('#page-host .sidebar-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'vendors')   loadHostVendors();
+  if (tab === 'guestlist') loadGuestList();
+  if (tab === 'budget')    loadBudgetTab();
+}
+
+// ── EDIT EVENT MODAL ──
+const PRIORITIES_ALL = ['quality','service','value','reliability','ambiance','experience'];
+
+function populateEditModal() {
+  if (!activeEventId) { showToast('No event selected', 'error'); return; }
+  const evt = hostEvents.find(e => e.id === activeEventId);
+  if (!evt) return;
+  document.getElementById('eeEventName').value     = evt.name || '';
+  document.getElementById('eeEventType').value     = evt.event_type || '';
+  document.getElementById('eeEventDate').value     = evt.event_date || '';
+  document.getElementById('eeEventLocation').value = evt.location || '';
+  document.getElementById('eeEventBudget').value   = evt.total_budget || '';
+  document.getElementById('eeEventDesc').value     = evt.description || '';
+  renderPriorityList(evt.priorities || PRIORITIES_ALL);
+}
+
+function renderPriorityList(prios) {
+  const list = document.getElementById('priorityList');
+  list.innerHTML = prios.map((p, i) => `
+    <div class="priority-item" draggable="true" data-prio="${p}"
+         ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dropPrio(event)">
+      <span class="priority-drag">⠿</span>
+      <span class="priority-label">${p.charAt(0).toUpperCase() + p.slice(1)}</span>
+      <span class="priority-badge">#${i+1}</span>
+    </div>`).join('');
+}
+
+let dragSrc = null;
+function dragStart(e) { dragSrc = e.currentTarget; e.dataTransfer.effectAllowed = 'move'; }
+function dragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dropPrio(e)  {
+  e.preventDefault();
+  if (!dragSrc || dragSrc === e.currentTarget) return;
+  const list = document.getElementById('priorityList');
+  const items = [...list.children];
+  const si = items.indexOf(dragSrc);
+  const di = items.indexOf(e.currentTarget);
+  if (si < di) list.insertBefore(dragSrc, e.currentTarget.nextSibling);
+  else         list.insertBefore(dragSrc, e.currentTarget);
+  // renumber
+  [...list.children].forEach((c, i) => { c.querySelector('.priority-badge').textContent = `#${i+1}`; });
+}
+
+async function saveEditEvent() {
+  const name = document.getElementById('eeEventName').value.trim();
+  if (!name) { showToast('Event name required', 'error'); return; }
+  const priorities = [...document.getElementById('priorityList').children].map(c => c.dataset.prio);
+  const payload = {
+    name,
+    event_type:   document.getElementById('eeEventType').value,
+    event_date:   document.getElementById('eeEventDate').value,
+    location:     document.getElementById('eeEventLocation').value,
+    total_budget: parseFloat(document.getElementById('eeEventBudget').value) || 0,
+    description:  document.getElementById('eeEventDesc').value,
+    priorities,
+  };
+  try {
+    const updated = await api(`/events/${activeEventId}`, 'PUT', payload);
+    const idx = hostEvents.findIndex(e => e.id === activeEventId);
+    if (idx >= 0) hostEvents[idx] = updated;
+    closeModal('editEventModal');
+    showToast('Event updated!', 'success');
+    refreshHostStats();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+function openEditEvent() {
+  if (!activeEventId) { showToast('Create an event first', 'error'); return; }
+  populateEditModal();
+  openModal('editEventModal');
+}
+
+// ── CREATE EVENT ──
+function openCreateEvent() { openModal('createEventModal'); }
+async function submitCreateEvent() {
+  const name = document.getElementById('ceEventName').value.trim();
+  const budget = parseFloat(document.getElementById('ceEventBudget').value) || 0;
+  
+  showHide('ceNameErr', !name);
+  if (!name) return;
+  
+  if (budget < 0) {
+    showToast('Budget cannot be negative', 'error');
+    return;
+  }
+
+  const payload = {
+    name,
+    event_type:   document.getElementById('ceEventType').value,
+    event_date:   document.getElementById('ceEventDate').value,
+    location:     document.getElementById('ceEventLocation').value,
+    total_budget: budget,
+  };
+  try {
+    const evt = await api('/events', 'POST', payload);
+    hostEvents.unshift(evt);
+    activeEventId = evt.id;
+    // update selector
+    const sel = document.getElementById('eventSelector');
+    const opt = document.createElement('option');
+    opt.value = evt.id; opt.textContent = `${evt.name} — ${evt.event_date || 'No date'}`;
+    sel.prepend(opt); sel.value = evt.id;
+    showHide('eventSelectorWrap', hostEvents.length > 1);
+    closeModal('createEventModal');
+    showToast('Event created!', 'success');
+    refreshHostStats();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ── GUEST LIST ──
+async function loadGuestList() {
+  if (!activeEventId) return;
+  try {
+    const guests = await api(`/events/${activeEventId}/guests`);
+    const acc = guests.filter(g => g.rsvp_status === 'accepted').length;
+    const pen = guests.filter(g => g.rsvp_status === 'pending').length;
+    const dec = guests.filter(g => g.rsvp_status === 'declined').length;
+    document.getElementById('guestAccepted').textContent = acc;
+    document.getElementById('guestPending').textContent  = pen;
+    document.getElementById('guestDeclined').textContent = dec;
+    const tbody = document.getElementById('guestTableBody');
+    if (!guests.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:2rem;">No guests yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = guests.map(g => `<tr>
+      <td style="font-weight:500;">${g.name || ''}</td>
+      <td style="color:var(--text-muted);">${g.email}</td>
+      <td>${rsvpBadge(g.rsvp_status)}</td>
+      <td style="color:var(--text-muted);font-size:.8rem;">${g.invited_at ? g.invited_at.slice(0,10) : ''}</td>
+      <td><button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:.2rem .5rem;" onclick="removeGuest(${g.id})">Remove</button></td>
+    </tr>`).join('');
+  } catch(e) { showToast('Could not load guests', 'error'); }
+}
+
+async function submitInviteGuest() {
+  const email = document.getElementById('igEmail').value.trim();
+  const name  = document.getElementById('igName').value.trim();
+  showHide('igEmailErr', !email.includes('@'));
+  if (!email.includes('@')) return;
+  try {
+    await api(`/events/${activeEventId}/guests`, 'POST', { email, name });
+    closeModal('inviteGuestModal');
+    document.getElementById('igEmail').value = '';
+    document.getElementById('igName').value  = '';
+    showToast('Guest invited!', 'success');
+    loadGuestList();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function removeGuest(gid) {
+  try {
+    await api(`/events/${activeEventId}/guests/${gid}`, 'DELETE');
+    showToast('Guest removed', 'info');
+    loadGuestList();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ── AI BUDGET RECOMMENDATIONS ──
+async function getBudgetRecommendations() {
+  if (!activeEventId) return;
+  
+  const recContainer = document.getElementById('recommendationResults');
+  recContainer.classList.remove('hidden');
+  recContainer.innerHTML = '<div class="empty-state"><div class="icon">🤖</div><p>Analysing ABSA scores and allocating budget...</p></div>';
+  
+  const evt = hostEvents.find(e => e.id === activeEventId);
+  if (!evt || evt.total_budget <= 0) {
+    recContainer.innerHTML = '<div class="empty-state" style="padding:1rem;"><p style="color:var(--danger);">Please set a valid Total Budget via "Set Total Budget" first.</p></div>';
+    return;
+  }
+
+  try {
+    // Ensure we have loaded the global vendors list to send to the engine
+    if (!allVendors || allVendors.length === 0) {
+      allVendors = await api('/vendors');
+    }
+
+    // Map vendors to match the Python engine's expected structure
+    const payloadVendors = allVendors.map(v => ({
+      name: v.business_name,
+      category: v.category || 'other',
+      price: v.min_price || 0,
+      absa_score: v.raw_score || 0,
+      review_count: v.review_count || 0
+    }));
+
+    // FIX: Dynamically extract the actual vendor categories (Venue, Catering, etc.) 
+    // We set a standard sensible order for events, and append any custom ones found.
+    const dynamicCats = [...new Set(payloadVendors.map(v => v.category))];
+    const standardCats = ["venue", "catering", "decoration", "photography", "entertainment"];
+    
+    // Merge standard + dynamic, keeping only the categories that actually have vendors
+    const finalCategoryPriority = [...new Set([...standardCats, ...dynamicCats])]
+                                  .filter(c => dynamicCats.includes(c));
+
+    const payload = {
+      mode: "auto",
+      total_budget: evt.total_budget,
+      priority_order: finalCategoryPriority, // <-- Now passing actual categories!
+      vendors: payloadVendors
+    };
+
+    const res = await api('/budget/recommend', 'POST', payload);
+    
+    // Render the AI Recommendation Results
+    let html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:.5rem; border-bottom:1px solid var(--border);">
+        <span style="font-weight:600; font-size:.9rem;">Engine used: ${res.solver || 'auto'}</span>
+        <span style="font-weight:600; font-size:.9rem; color:var(--indigo);">Est. Total: ${fmtMoney(res.total_cost)} / ${fmtMoney(evt.total_budget)}</span>
+      </div>
+      <table style="margin-bottom: .5rem;">
+        <thead><tr><th>Priority Category</th><th>Recommended Vendor</th><th>Est. Price</th><th>ABSA Star Rating</th></tr></thead>
+        <tbody>`;
+        
+    for (const [cat, v] of Object.entries(res.selection)) {
+      if (v) {
+        html += `<tr>
+          <td><span class="tag" style="text-transform: capitalize;">${cat}</span></td>
+          <td style="font-weight:600;">${v.name}</td>
+          <td>${fmtMoney(v.price)}</td>
+          <td style="color:#f59e0b;">${v.star_rating} ★</td>
+        </tr>`;
+      } else {
+         html += `<tr>
+          <td><span class="tag" style="text-transform: capitalize;">${cat}</span></td>
+          <td colspan="3" style="color:var(--text-muted); font-size:.8rem;">No affordable vendor found in this category.</td>
+        </tr>`;
+      }
+    }
+    
+    html += `</tbody></table>`;
+    if(res.remaining > 0) {
+        html += `<p style="font-size:.8rem; color:var(--success); margin-top:.5rem;">Remaining Buffer: ${fmtMoney(res.remaining)}</p>`;
+    }
+    
+    recContainer.innerHTML = html;
+
+  } catch (e) {
+    recContainer.innerHTML = `<div class="empty-state" style="padding:1rem;"><p style="color:var(--danger);">Failed to generate plan: ${e.message}</p></div>`;
+  }
+}
+
+// ── BUDGET TAB ──
+async function loadBudgetTab() {
+  if (!activeEventId) return;
+  try {
+    const bookings = await api(`/events/${activeEventId}/bookings`);
+    const el = document.getElementById('budgetBreakdown');
+    if (!bookings.length) {
+      el.innerHTML = '<div class="empty-state" style="padding:1.5rem;"><p>No expenses added yet.</p></div>';
+      return;
+    }
+    el.innerHTML = `<table>
+      <thead><tr><th>Vendor</th><th>Category</th><th>Amount</th><th>Action</th></tr></thead>
+      <tbody>${bookings.map(b => `<tr>
+        <td style="font-weight:500;">${b.vendor_name}</td>
+        <td><span class="tag">${b.category}</span></td>
+        <td>${fmtMoney(b.amount)}</td>
+        <td><button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="removeBooking(${b.id})">Remove</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch(e) {}
+}
+
+async function loadVendorsForExpenseDropdown() {
+  try {
+    const vendors = await api('/vendors');
+    const sel = document.getElementById('expVendor');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Select vendor...</option>' +
+      vendors.map(v => `<option value="${v.id}">${v.business_name}</option>`).join('');
+    allVendors = vendors;
+  } catch(e) {}
+}
+
+async function addExpense() {
+  const vid    = document.getElementById('expVendor').value;
+  const cat    = document.getElementById('expCat').value.trim();
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  if (!vid || !amount || amount <= 0) { showToast('Select a vendor and enter a valid amount', 'error'); return; }
+  try {
+    await api(`/events/${activeEventId}/bookings`, 'POST', { vendor_id: vid, category: cat, amount });
+    showToast('Expense added!', 'success');
+    refreshHostStats();
+    loadBudgetTab();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function removeBooking(bid) {
+  try {
+    await api(`/events/${activeEventId}/bookings/${bid}`, 'DELETE');
+    showToast('Removed', 'info');
+    refreshHostStats();
+    loadBudgetTab();
+    loadOverviewBookings();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ── VENDOR LISTING ──
+async function loadHostVendors() {
+  const q   = document.getElementById('hVendorSearch')?.value || '';
+  const cat = document.getElementById('hVendorCat')?.value    || '';
+  renderVendorGrid('hostVendorGrid', q, cat, true);
+}
+
+async function loadPublicVendors() {
+  const q   = document.getElementById('pubVendorSearch')?.value || '';
+  const cat = document.getElementById('pubVendorCat')?.value    || '';
+  renderVendorGrid('pubVendorGrid', q, cat, false);
+}
+
+async function renderVendorGrid(gridId, q, cat, isHost) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Loading...</p></div>';
+  try {
+    let url = '/vendors?';
+    if (q)   url += `q=${encodeURIComponent(q)}&`;
+    if (cat) url += `category=${encodeURIComponent(cat)}&`;
+    const vendors = await api(url.replace(/&$/, ''));
+    if (!vendors.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No vendors found.</p></div>';
+      return;
+    }
+    grid.innerHTML = vendors.map(v => `
+      <div class="card vendor-card" style="cursor:pointer;" onclick="openVendorModal(${v.id}, ${isHost})">
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <div class="vendor-avatar">${(v.business_name || '?')[0].toUpperCase()}</div>
+          <div class="vendor-info" style="flex:1;">
+            <h4>${v.business_name}</h4>
+            <p>${v.category || ''} · ${v.city || ''}</p>
+          </div>
+        </div>
+        <div class="vendor-tags">
+          ${(v.tags || []).slice(0,3).map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        <div class="rating">
+          <span class="stars">${starsHtml(v.star_rating || 3)}</span>
+          <span>${(v.star_rating || 3).toFixed(1)} (${v.review_count || 0} reviews)</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.25rem;">
+          <span style="font-size:.8rem;color:var(--text-muted);">${v.min_price ? (v.min_price === v.max_price ? fmtMoney(v.min_price) + ' Flat Rate' : fmtMoney(v.min_price) + ' – ' + fmtMoney(v.max_price)) : 'Price on request'}</span>
+          ${v.raw_score !== undefined ? `<span style="font-size:.72rem;color:var(--indigo);font-weight:600;">ABSA ${v.raw_score >= 0 ? '+' : ''}${Number(v.raw_score).toFixed(2)}</span>` : ''}
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">⚠</div><p>Could not load vendors</p></div>';
+  }
+}
+
+async function openVendorModal(vid, isHost) {
+  openModal('vendorModal');
+  document.getElementById('vendorModalContent').innerHTML = '<p style="color:var(--text-muted);">Loading...</p>';
+  document.getElementById('vendorModalActions').innerHTML = '';
+  try {
+    const v = await api(`/vendors/${vid}`);
+    const reviews = await api(`/vendors/${vid}/reviews`);
+    const aspects = ['quality','service','value','reliability','ambiance','experience'];
+    const aspHtml = aspects.map(a => {
+      const score = v[`aspect_${a}`];
+      if (score === null || score === undefined) return '';
+      const col = score >= 0 ? 'var(--success)' : 'var(--danger)';
+      return `<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;">
+        <span style="width:80px;color:var(--text-muted);">${a}</span>
+        <div style="flex:1;height:6px;background:var(--bg-ter);border-radius:3px;overflow:hidden;">
+          <div style="width:${Math.round((score+1)/2*100)}%;height:100%;background:${col};border-radius:3px;"></div>
+        </div>
+        <span style="color:${col};font-weight:600;">${score >= 0 ? '+' : ''}${Number(score).toFixed(2)}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('vendorModalContent').innerHTML = `
+      <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;">
+        <div class="vendor-avatar" style="width:56px;height:56px;font-size:1.3rem;">${(v.business_name||'?')[0]}</div>
+        <div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;">${v.business_name}</h2>
+          <p style="color:var(--text-muted);font-size:.85rem;">${v.category || ''} · ${v.city || ''}</p>
+          <div class="rating" style="margin-top:.25rem;">
+            <span class="stars">${starsHtml(v.star_rating || 3)}</span>
+            <span>${(v.star_rating||3).toFixed(1)} · ${v.review_count || 0} reviews</span>
+          </div>
+        </div>
+      </div>
+      ${v.description ? `<p style="font-size:.875rem;color:var(--text-sec);margin-bottom:1rem;line-height:1.6;">${v.description}</p>` : ''}
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem;color:var(--text-muted);margin-bottom:1rem;">
+        ${v.min_price ? `<span>💰 ${v.min_price === v.max_price ? fmtMoney(v.min_price) + ' Flat Rate' : fmtMoney(v.min_price) + ' – ' + fmtMoney(v.max_price)}</span>` : ''}
+        ${v.phone ? `<span>📞 ${v.phone}</span>` : ''}
+        ${v.description ? `
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <h4 style="font-size: .85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.5rem;">About</h4>
+            <p style="font-size: .9rem; color: var(--text-sec); line-height: 1.6;">${v.description}</p>
+          </div>
+        ` : ''}
+      </div>
+      ${aspHtml ? `<div style="background:var(--bg-sec);border-radius:10px;padding:1rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:.5rem;">${aspHtml}</div>` : ''}
+      ${reviews.length ? `<div style="margin-top:1rem;"><p style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.75rem;">Recent Reviews</p>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          ${reviews.slice(0,3).map(r => `
+            <div style="background:var(--bg-sec);border-radius:10px;padding:.85rem;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
+                <span style="font-size:.8rem;font-weight:600;">${r.reviewer_name}</span>
+                <span style="font-size:.75rem;color:var(--text-muted);">${r.created_at.slice(0,10)}</span>
+              </div>
+              <p style="font-size:.82rem;color:var(--text-sec);line-height:1.5;">${r.review_text}</p>
+              ${r.absa_score !== null ? `<div style="margin-top:.4rem;font-size:.72rem;color:var(--indigo);font-weight:600;">ABSA: ${r.absa_score >= 0 ? '+' : ''}${Number(r.absa_score).toFixed(3)}</div>` : ''}
+            </div>`).join('')}
+        </div></div>` : ''}`;
+
+    if (isHost && activeEventId) {
+      document.getElementById('vendorModalActions').innerHTML = `
+        <button class="btn btn-primary btn-sm" onclick="sendInquiry(${vid},'${v.business_name}')">Send Inquiry</button>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('vendorModal')">Close</button>`;
+    }
+  } catch(e) {
+    document.getElementById('vendorModalContent').innerHTML = '<p style="color:var(--danger);">Could not load vendor details</p>';
+  }
+}
+
+function sendInquiry(vid, name) {
+  activeInquiryVendorId = vid;
+  document.getElementById('inqVendorName').textContent = name;
+  closeModal('vendorModal');
+  openModal('inquiryModal');
+}
+
+async function submitInquiry() {
+  const msg = document.getElementById('inqMessage').value.trim();
+  const budget = document.getElementById('inqBudget').value;
+  try {
+    await api(`/vendors/${activeInquiryVendorId}/inquiries`, 'POST', {
+      message: msg,
+      budget: budget ? parseFloat(budget) : null,
+      event_id: activeEventId,
+    });
+    closeModal('inquiryModal');
+    document.getElementById('inqMessage').value = '';
+    document.getElementById('inqBudget').value  = '';
+    showToast('Inquiry sent!', 'success');
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ══════════════════════════════
+// ATTENDEE DASHBOARD
+// ══════════════════════════════
+
+async function loadAttendeeDashboard() {
+  document.getElementById('attendeeGreeting').textContent =
+    `Welcome back, ${currentUser.first_name}!`;
+  loadInvites();
+  loadVendorDropdownForRating();
+}
+
+async function loadInvites() {
+  try {
+    const invites = await api('/attendee/invites');
+    const el = document.getElementById('invitesList');
+    if (!invites.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">💌</div><p>No invitations yet.</p></div>';
+      return;
+    }
+    el.innerHTML = '<div class="card-grid card-grid-2">' + invites.map(inv => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">
+          <div>
+            <h3 style="font-size:1rem;font-weight:700;">${inv.event_name}</h3>
+            <p style="font-size:.8rem;color:var(--text-muted);">${inv.event_date || 'Date TBD'} · ${inv.event_location || ''}</p>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-top:.2rem;">By ${inv.host_name}</p>
+          </div>
+          ${rsvpBadge(inv.rsvp_status)}
+        </div>
+        ${inv.rsvp_status === 'pending' ? `
+          <div style="display:flex;gap:.5rem;">
+            <button class="btn btn-success btn-sm" onclick="respondInvite(${inv.id},'accepted')">Accept</button>
+            <button class="btn btn-danger btn-sm"  onclick="respondInvite(${inv.id},'declined')">Decline</button>
+          </div>` : `<p style="font-size:.8rem;color:var(--text-muted);">Response sent on ${inv.responded_at ? inv.responded_at.slice(0,10) : '--'}</p>`}
+      </div>`).join('') + '</div>';
+  } catch(e) { showToast('Could not load invites', 'error'); }
+}
+
+async function respondInvite(gid, status) {
+  try {
+    await api(`/attendee/invites/${gid}`, 'PUT', { status });
+    showToast(status === 'accepted' ? 'RSVP confirmed!' : 'Invitation declined', status === 'accepted' ? 'success' : 'info');
+    loadInvites();
+    if (status === 'accepted') loadSchedule();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function loadSchedule() {
+  try {
+    const events = await api('/attendee/schedule');
+    const el = document.getElementById('scheduleList');
+    if (!events.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📅</div><p>No upcoming events. Accept some invitations first!</p></div>';
+      return;
+    }
+    el.innerHTML = '<div class="card-grid card-grid-2">' + events.map(evt => `
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;gap:.75rem;">
+          <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--purple));display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;flex-shrink:0;">
+            <span style="font-size:.65rem;font-weight:600;opacity:.85;">${evt.event_date ? new Date(evt.event_date).toLocaleString('en',{month:'short'}) : ''}</span>
+            <span style="font-size:1.1rem;font-weight:700;line-height:1;">${evt.event_date ? new Date(evt.event_date).getDate() : '--'}</span>
+          </div>
+          <div>
+            <h3 style="font-size:1rem;font-weight:700;">${evt.name}</h3>
+            <p style="font-size:.8rem;color:var(--text-muted);">${evt.location || ''}</p>
+            <p style="font-size:.8rem;color:var(--text-muted);">Hosted by ${evt.host_name}</p>
+          </div>
+        </div>
+      </div>`).join('') + '</div>';
+  } catch(e) {}
+}
+
+function switchAttendeeTab(tab, el) {
+  ['rsvp','schedule','rate'].forEach(t => showHide(`atab-${t}`, t === tab));
+  document.querySelectorAll('#page-attendee .sidebar-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'schedule') loadSchedule();
+}
+
+async function loadVendorDropdownForRating() {
+  try {
+    const vendors = await api('/vendors');
+    const sel = document.getElementById('rateVendorSel');
+    if (!sel) return;
+    sel.innerHTML = vendors.map(v => `<option value="${v.id}">${v.business_name}</option>`).join('');
+  } catch(e) {}
+}
+
+async function submitRating() {
+  const vid    = document.getElementById('rateVendorSel')?.value;
+  const text   = document.getElementById('ratingReview').value.trim();
+  const rating = parseInt(document.getElementById('rateOverall').value);
+  showHide('ratingErr', text.length < 20);
+  if (text.length < 20) return;
+  try {
+    const result = await api(`/vendors/${vid}/reviews`, 'POST', {
+      review_text: text, overall_rating: rating,
+    });
+    document.getElementById('ratingReview').value = '';
+    showToast('Review submitted!', 'success');
+    // Show ABSA panel
+    if (result.aspects && result.aspects.length) {
+      const panel = document.getElementById('absaPanel');
+      const col   = result.overall_score >= 0 ? 'var(--success)' : 'var(--danger)';
+      const displayScore = result.overall_score !== undefined ? result.overall_score : 0;
+      const sign = displayScore >= 0 ? '+' : '';
+      panel.innerHTML = `
+  <div style="border-left:3px solid ${col};padding-left:.75rem;">
+    <p style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.5rem;">ABSA Sentiment Analysis</p>
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+      <span style="font-size:1.3rem;font-weight:700;color:${col};">${sign}${Number(displayScore).toFixed(3)}</span>
+      <span style="font-size:.8rem;color:var(--text-muted);">${Number(result.star_rating || 3).toFixed(1)} / 5 stars</span>
+    </div>
+    `;
+      panel.classList.remove('hidden');
+    }
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+// ══════════════════════════════
+// VENDOR DASHBOARD
+// ══════════════════════════════
+
+async function loadVendorDashboard() {
+  loadVendorProfile();
+}
+
+function switchVendorTab(tab, el) {
+  ['profile','inquiries','reviews'].forEach(t => showHide(`vtab-${t}`, t === tab));
+  document.querySelectorAll('#page-vendor .sidebar-link').forEach(l => l.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (tab === 'inquiries') loadInquiries();
+  if (tab === 'reviews')   loadVendorReviews();
+}
+
+async function loadVendorProfile() {
+  try {
+    const vp = await api('/vendors/me');
+    document.getElementById('vBizName').value  = vp.business_name || '';
+    document.getElementById('vCategory').value = vp.category || '';
+    document.getElementById('vTags').value     = (vp.tags || []).join(', ');
+    document.getElementById('vMinPrice').value  = vp.min_price || '';
+    document.getElementById('vMaxPrice').value  = vp.max_price || '';
+    document.getElementById('vPhone').value     = vp.phone || '';
+    document.getElementById('vCity').value      = vp.city || '';
+    document.getElementById('vDesc').value      = vp.description || '';
+
+    // ABSA scores
+    const aspects = ['quality','service','value','reliability','ambiance','experience'];
+    const scored  = aspects.filter(a => vp[`aspect_${a}`] !== null && vp[`aspect_${a}`] !== undefined);
+    if (scored.length) {
+      const grid = document.getElementById('vendorAbsaGrid');
+      grid.innerHTML = scored.map(a => {
+        const sc  = vp[`aspect_${a}`];
+        const col = sc >= 0 ? 'var(--success)' : 'var(--danger)';
+        const star= ((sc + 1) / 2 * 5).toFixed(1);
+        return `<div class="stat-card" style="text-align:center;">
+          <div class="stat-label">${a}</div>
+          <div class="stat-value" style="color:${col};font-size:1.3rem;">${sc >= 0 ? '+' : ''}${sc.toFixed(2)}</div>
+          <div class="stat-change" style="color:#f59e0b;">${starsHtml(parseFloat(star))} ${star}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('vendorAbsaStats').classList.remove('hidden');
+    }
+  } catch(e) { /* no profile yet */ }
+}
+
+async function saveVendorProfile() {
+  const biz = document.getElementById('vBizName').value.trim();
+  showHide('vBizErr', !biz);
+  if (!biz) return;
+  const tags = document.getElementById('vTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const payload = {
+    business_name: biz,
+    category:      document.getElementById('vCategory').value,
+    tags,
+    min_price:     parseFloat(document.getElementById('vMinPrice').value) || 0,
+    max_price:     parseFloat(document.getElementById('vMaxPrice').value) || 0,
+    phone:         document.getElementById('vPhone').value,
+    city:          document.getElementById('vCity').value,
+    description:   document.getElementById('vDesc').value,
+  };
+  try {
+    await api('/vendors/me', 'PUT', payload);
+    showToast('Profile saved!', 'success');
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function loadInquiries() {
+  try {
+    const inqs = await api('/vendors/me/inquiries');
+    const el   = document.getElementById('inquiriesList');
+    if (!inqs.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">📩</div><p>No inquiries yet.</p></div>';
+      return;
+    }
+    el.innerHTML = '<div class="card-grid card-grid-2">' + inqs.map(inq => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;">
+          <div>
+            <h3 style="font-size:.95rem;font-weight:700;">${inq.event_name || 'Event Inquiry'}</h3>
+            <p style="font-size:.8rem;color:var(--text-muted);">${inq.event_date || ''} · from ${inq.host_name}</p>
+          </div>
+          <span class="badge ${inq.status === 'pending' ? 'badge-warning' : inq.status === 'accepted' ? 'badge-success' : 'badge-danger'}">${inq.status}</span>
+        </div>
+        ${inq.message ? `<p style="font-size:.85rem;color:var(--text-sec);line-height:1.5;margin-bottom:.75rem;">${inq.message}</p>` : ''}
+        ${inq.budget ? `<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.75rem;">Budget: ${fmtMoney(inq.budget)}</p>` : ''}
+        ${inq.status === 'pending' ? `
+          <div style="display:flex;gap:.5rem;">
+            <button class="btn btn-success btn-sm" onclick="updateInquiry(${inq.id},'accepted')">Accept</button>
+            <button class="btn btn-ghost btn-sm" onclick="updateInquiry(${inq.id},'declined')">Decline</button>
+          </div>` : ''}
+      </div>`).join('') + '</div>';
+  } catch(e) { showToast('Could not load inquiries', 'error'); }
+}
+
+async function updateInquiry(iid, status) {
+  try {
+    await api(`/inquiries/${iid}`, 'PUT', { status });
+    showToast(status === 'accepted' ? 'Inquiry accepted!' : 'Inquiry declined', 'success');
+    loadInquiries();
+  } catch(e) { showToast(e.message, 'error'); }
+}
+
+async function loadVendorReviews() {
+  try {
+    const reviews = await api('/vendors/me/reviews');
+    const el = document.getElementById('vendorReviewsList');
+    if (!reviews.length) {
+      el.innerHTML = '<div class="empty-state"><div class="icon">⭐</div><p>No reviews yet. Share your profile link with clients!</p></div>';
+      return;
+    }
+    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:1rem;">' + reviews.map(r => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;">
+          <div>
+            <span style="font-size:.9rem;font-weight:600;">${r.reviewer_name}</span>
+            <span style="font-size:.75rem;color:var(--text-muted);margin-left:.5rem;">${r.created_at.slice(0,10)}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem;">
+            <span style="color:#f59e0b;">${starsHtml(r.overall_rating)}</span>
+            ${r.absa_score !== null ? `<span style="font-size:.75rem;font-weight:600;color:${r.absa_score >= 0 ? 'var(--success)' : 'var(--danger)'};">ABSA ${r.absa_score >= 0 ? '+' : ''}${Number(r.absa_score).toFixed(3)}</span>` : ''}
+          </div>
+        </div>
+        <p style="font-size:.875rem;color:var(--text-sec);line-height:1.6;">${r.review_text}</p>
+        ${r.absa_aspects && r.absa_aspects.length ? `
+          <div class="absa-chips" style="margin-top:.6rem;">
+            ${r.absa_aspects.map(a => {
+              const c = {positive:'var(--success)',negative:'var(--danger)',neutral:'var(--warning)',conflict:'var(--purple)'}[a.sentiment]||'#888';
+              return `<span class="absa-chip" style="color:${c};">${a.aspect}: ${a.sentiment}</span>`;
+            }).join('')}
+          </div>` : ''}
+      </div>`).join('') + '</div>';
+  } catch(e) { showToast('Could not load reviews', 'error'); }
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await api('/auth/me');
+    currentUser = res.user;
+    afterLogin();
+  } catch(e) {
+    // not logged in, show home
+  }
+});
+</script>
+</body>
+</html>

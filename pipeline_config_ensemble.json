@@ -1,0 +1,54 @@
+{
+  "pipeline_mode": "ensemble",
+  "active_models": [
+    "bert",
+    "deberta",
+    "roberta",
+    "electra"
+  ],
+  "ate_label_names": [
+    "O",
+    "B-ASP",
+    "I-ASP"
+  ],
+  "sentiment_label_names": [
+    "positive",
+    "negative",
+    "neutral",
+    "conflict"
+  ],
+  "sentiment_label_map": {
+    "positive": 0,
+    "negative": 1,
+    "neutral": 2,
+    "conflict": 3
+  },
+  "sentiment_score_map": {
+    "positive": 1.0,
+    "negative": -1.0,
+    "neutral": 0.0,
+    "conflict": -0.5
+  },
+  "ensemble_min_votes": 2,
+  "elo_k_factor": 32,
+  "elo_initial": 1500,
+  "bayesian_m": 10,
+  "model_dirs": {
+    "bert": {
+      "ate": "./bert_ate_model_final",
+      "sent": "./bert_sentiment_model_final"
+    },
+    "deberta": {
+      "ate": "./deberta_ate_model_final",
+      "sent": "./deberta_sentiment_model_final"
+    },
+    "roberta": {
+      "ate": "./roberta_ate_model_final",
+      "sent": "./roberta_sentiment_model_final"
+    },
+    "electra": {
+      "ate": "./electra_ate_model_final",
+      "sent": "./electra_sentiment_model_final"
+    }
+  }
+}

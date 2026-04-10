@@ -1,0 +1,31 @@
+{
+  "model_key": "deberta",
+  "checkpoint": "microsoft/deberta-v3-base",
+  "ate_model_path": "./deberta_ate_model_final",
+  "sentiment_model_path": "./deberta_sentiment_model_final",
+  "ate_label_names": [
+    "O",
+    "B-ASP",
+    "I-ASP"
+  ],
+  "sentiment_label_names": [
+    "positive",
+    "negative",
+    "neutral",
+    "conflict"
+  ],
+  "sentiment_label_map": {
+    "positive": 0,
+    "negative": 1,
+    "neutral": 2,
+    "conflict": 3
+  },
+  "sentiment_score_map": {
+    "positive": 1.0,
+    "negative": -1.0,
+    "neutral": 0.0,
+    "conflict": -0.5
+  },
+  "ate_accuracy": 0.9903,
+  "sent_accuracy": 0.9084
+}

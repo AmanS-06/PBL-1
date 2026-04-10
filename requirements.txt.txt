@@ -1,0 +1,9 @@
+flask
+flask-sqlalchemy
+flask-cors
+pymysql
+numpy
+scipy
+transformers
+werkzeug
+gunicorn

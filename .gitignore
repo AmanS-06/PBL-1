@@ -1,0 +1,18 @@
+# Ignore all Machine Learning weight and state files anywhere in the project
+*.safetensors
+*.pt
+*.pth
+*.bin
+
+# Ignore massive datasets
+yelp_academic_dataset_review.json
+*.xml
+
+# Ignore all model training directories and checkpoints
+*_model_final/
+*_model/
+ate_model/
+
+# Ignore Python cache files (Standard practice)
+__pycache__/
+*.pyc

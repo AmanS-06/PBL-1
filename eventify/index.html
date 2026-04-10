@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventify — Plan Your Event With Ease</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/stripe@14/stripe.min.js"></script>
+<style>
+  :root {
+    --indigo: #4f46e5;
+    --purple: #9333ea;
+    --indigo-light: #818cf8;
+    --purple-light: #c084fc;
+    --bg: #ffffff;
+    --bg-sec: #f8f7ff;
+    --bg-ter: #f1f0fe;
+    --text: #0f0e1a;
+    --text-sec: #4b4866;
+    --text-muted: #8b87a8;
+    --border: rgba(79,70,229,0.15);
+    --border-hover: rgba(79,70,229,0.3);
+    --card-bg: #ffffff;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0a0914;
+    --bg-sec: #13112b;
+    --bg-ter: #1a1836;
+    --text: #f0eeff;
+    --text-sec: #b8b4d4;
+    --text-muted: #6b67a0;
+    --border: rgba(129,140,248,0.15);
+    --border-hover: rgba(129,140,248,0.3);
+    --card-bg: #13112b;
+    --indigo: #818cf8;
+    --purple: #c084fc;
+    --indigo-light: #a5b4fc;
+    --purple-light: #d8b4fe;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; animation: fadeIn 0.4s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    cursor: pointer;
+  }
+  .nav-links { display: flex; gap: 0.25rem; align-items: center; }
+  .nav-link {
+    padding: 0.4rem 0.9rem; border-radius: 8px;
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--text-sec); cursor: pointer;
+    border: none; background: none;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { background: var(--bg-sec); color: var(--text); }
+  .nav-link.active { background: var(--bg-ter); color: var(--indigo); }
+  .nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+  .theme-toggle {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg-sec);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; transition: all 0.2s;
+  }
+  .theme-toggle:hover { background: var(--bg-ter); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.4rem; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    border: none; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--indigo), var(--purple)); color: white; }
+  .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  .btn-secondary { background: var(--bg-sec); color: var(--text); }
+  .btn-secondary:hover { background: var(--bg-ter); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--bg-sec); }
+  .btn-small { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { filter: brightness(1.1); }
+
+  /* ── CONTAINER ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+  .section { margin: 2rem 0; }
+  .section-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Playfair Display'; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .card:hover { border-color: var(--border-hover); }
+
+  /* ── GRID ── */
+  .grid { display: grid; gap: 1.5rem; }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+  /* ── FORMS ── */
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-sec);
+    color: var(--text);
+    font-family: inherit;
+    transition: border 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 100px; }
+
+  /* ── MODAL ── */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .modal-header h2 { font-size: 1.5rem; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab { padding: 1rem; cursor: pointer; border: none; background: none; color: var(--text-sec); border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab.active { color: var(--indigo); border-bottom-color: var(--indigo); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-success { background: rgba(5, 150, 105, 0.2); color: var(--success); }
+  .badge-warning { background: rgba(217, 119, 6, 0.2); color: var(--warning); }
+  .badge-danger { background: rgba(220, 38, 38, 0.2); color: var(--danger); }
+
+  /* ── STATS ── */
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--indigo); }
+  .stat-label { color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem; }
+
+  /* ── PRODUCT CARD ── */
+  .product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .product-card:hover { border-color: var(--indigo); transform: translateY(-4px); }
+  .product-image {
+    width: 100%;
+    height: 180px;
+    background: var(--bg-sec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 3rem;
+    object-fit: cover;
+  }
+  .product-info { padding: 1rem; }
+  .product-name { font-weight: 600; margin-bottom: 0.5rem; }
+  .product-price { color: var(--indigo); font-weight: 700; font-size: 1.1rem; margin: 0.5rem 0; }
+  .product-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; }
+  .product-actions { display: flex; gap: 0.5rem; }
+  .product-actions button { flex: 1; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease;
+    z-index: 2000;
+  }
+  @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error { border-left: 3px solid var(--danger); }
+
+  /* ── VENDOR GRID ── */
+  .vendor-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .vendor-card:hover { border-color: var(--indigo); }
+  .vendor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--indigo), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    object-fit: cover;
+  }
+  .vendor-name { font-weight: 600; margin-bottom: 0.5rem; }
+  .vendor-info { color: var(--text-muted); font-size: 0.85rem; }
+  .vendor-rating { color: var(--warning); margin-top: 0.5rem; }
+
+  /* ── RSVP STATUS ── */
+  .rsvp-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .rsvp-stat { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
+  .rsvp-stat:last-child { border-bottom: none; }
+  .rsvp-count { font-size: 1.5rem; font-weight: 700; color: var(--indigo); }
+
+  /* ── TODO LIST ── */
+  .todo-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+    margin-bottom: 0.8rem;
+  }
+  .todo-item.completed { opacity: 0.6; }
+  .todo-item input[type="checkbox"] { cursor: pointer; }
+  .todo-content { flex: 1; }
+  .todo-title { font-weight: 500; }
+  .todo-desc { font-size: 0.85rem; color: var(--text-muted); }
+  .todo-priority { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .todo-priority.high { background: rgba(220, 38, 38, 0.2); color: var(--danger); }
+  .todo-priority.medium { background: rgba(217, 119, 6, 0.2); color: var(--warning); }
+  .todo-priority.low { background: rgba(5, 150, 105, 0.2); color: var(--success); }
+
+  /* ── BUDGET CHART ── */
+  .budget-bar {
+    background: var(--bg-sec);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+  }
+  .budget-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--indigo), var(--purple));
+    transition: width 0.3s;
+  }
+  .budget-overflow { background: var(--danger); }
+
+  /* ── UTILITY ── */
+  .flex { display: flex; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .flex-center { display: flex; justify-content: center; align-items: center; }
+  .gap-1 { gap: 0.5rem; }
+  .gap-2 { gap: 1rem; }
+  .mt-1 { margin-top: 0.5rem; }
+  .mt-2 { margin-top: 1rem; }
+  .mb-1 { margin-bottom: 0.5rem; }
+  .mb-2 { margin-bottom: 1rem; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--text-muted); }
+  .text-success { color: var(--success); }
+  .text-danger { color: var(--danger); }
+  .text-warning { color: var(--warning); }
+
+  /* ── LOADING ── */
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--indigo);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .container { padding: 1rem; }
+    nav { padding: 0 1rem; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .modal-content { width: 95%; padding: 1.5rem; }
+    .tabs { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- NAVIGATION BAR -->
+<!-- ══════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Eventify</div>
+  <div class="nav-links" id="navLinks">
+    <button class="nav-link active" onclick="showPage('home')">Home</button>
+    <button class="nav-link" onclick="showPage('discover')">Discover</button>
+    <button class="nav-link" id="vendorNavLink" style="display: none;" onclick="showPage('vendor')">My Shop</button>
+    <button class="nav-link" id="hostNavLink" style="display: none;" onclick="showPage('host')">Events</button>
+    <button class="nav-link" onclick="document.getElementById('absaPlannerModal').classList.add('active')"
+      style="background:linear-gradient(135deg,var(--indigo),var(--purple));color:#fff;font-weight:600;">
+      ABSA Planner
+    </button>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" onclick="toggleTheme()">moon</button>
+    <button class="nav-link" id="authBtn" onclick="openAuthModal()">Sign In</button>
+    <button class="nav-link" id="logoutBtn" style="display: none;" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- HOME PAGE -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page active" id="homePage">
+  <div class="container">
+    <div style="text-align: center; padding: 4rem 0;">
+      <h1 style="font-size: 3.5rem; font-family: 'Playfair Display'; font-weight: 900; margin-bottom: 1rem;">
+        Plan Your Perfect Event
+      </h1>
+      <p style="font-size: 1.1rem; color: var(--text-sec); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Connect with trusted vendors, manage budgets, track RSVPs, and bring your vision to life with Eventify.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button class="btn btn-primary" onclick="openAuthModal('host')">Host an Event</button>
+        <button class="btn btn-outline" onclick="openAuthModal('vendor')">Become a Vendor</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Featured Vendors</h2>
+      <div class="grid grid-3" id="featuredVendors"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- DISCOVER PAGE -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="discoverPage">
+  <div class="container">
+    <h1 class="section-title">Discover Vendors</h1>
+    <div style="margin-bottom: 2rem; display: flex; gap: 1rem;">
+      <input type="text" id="searchInput" placeholder="Search vendors..." style="flex: 1; padding: 0.7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-sec);">
+      <select id="sortSelect" style="padding: 0.7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-sec);">
+        <option value="rating">Top Rated</option>
+        <option value="name">A-Z</option>
+        <option value="new">Newest</option>
+      </select>
+    </div>
+    <div class="grid grid-3" id="vendorsGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- VENDOR DASHBOARD -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="vendorPage">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom: 2rem;">
+      <h1 class="section-title">My Shop</h1>
+      <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchVendorTab('products')">Products</button>
+      <button class="tab" onclick="switchVendorTab('profile')">Profile</button>
+      <button class="tab" onclick="switchVendorTab('orders')">Orders</button>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="productsTab" style="display: block;">
+      <div class="grid grid-3" id="productsGrid"></div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div id="profileTab" style="display: none;">
+      <div class="card" style="max-width: 600px;">
+        <h2 style="margin-bottom: 1.5rem;">Business Profile</h2>
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" id="businessName" placeholder="Your business name">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="businessLocation" placeholder="City/Area">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="businessDesc" placeholder="Tell customers about your business"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Profile Picture</label>
+          <input type="file" id="profileImage" accept="image/*">
+        </div>
+        <button class="btn btn-primary" onclick="updateVendorProfile()">Save Profile</button>
+      </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div id="ordersTab" style="display: none;">
+      <div class="card">
+        <h2 style="margin-bottom: 1.5rem;">Recent Orders</h2>
+        <div id="ordersListVendor">
+          <p class="text-muted">No orders yet</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- HOST DASHBOARD -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="hostPage">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom: 2rem;">
+      <h1 class="section-title">My Events</h1>
+      <button class="btn btn-primary" onclick="openEventModal()">+ Create Event</button>
+    </div>
+
+    <div id="eventsList" class="grid grid-2"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- EVENT DETAIL PAGE -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="page" id="eventDetailPage">
+  <div class="container">
+    <button class="btn btn-outline" style="margin-bottom: 1.5rem;" onclick="showPage('host')">← Back to Events</button>
+    
+    <div class="tabs" style="margin-bottom: 2rem;">
+      <button class="tab active" onclick="switchEventTab('overview')">Overview</button>
+      <button class="tab" onclick="switchEventTab('rsvp')">RSVPs</button>
+      <button class="tab" onclick="switchEventTab('vendors')">Vendors</button>
+      <button class="tab" onclick="switchEventTab('budget')">Budget</button>
+      <button class="tab" onclick="switchEventTab('todos')">To-Do</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overviewTab" style="display: block;">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Event Details</h3>
+          <div id="eventDetails"></div>
+          <button class="btn btn-outline" style="margin-top: 1rem;" onclick="openEventModal()">Edit Event</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Quick Actions</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <button class="btn btn-primary" onclick="openInviteModal()">📧 Send Invites</button>
+            <button class="btn btn-secondary" onclick="generateRecommendations()">🎯 Get Recommendations</button>
+            <button class="btn btn-secondary" onclick="switchEventTab('vendors')">🏪 Add Vendors</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RSVP Tab -->
+    <div id="rsvpTab" style="display: none;">
+      <div class="grid grid-2">
+        <div class="rsvp-section">
+          <h3 style="margin-bottom: 1rem;">Response Stats</h3>
+          <div id="rsvpStats"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Guest List</h3>
+          <div id="guestList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendors Tab -->
+    <div id="vendorsTab" style="display: none;">
+      <div style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Vendor Recommendations</h3>
+        <div class="grid grid-2" id="recommendationsGrid"></div>
+      </div>
+      
+      <div>
+        <h3 style="margin-bottom: 1rem;">Current Orders</h3>
+        <div id="orderItemsList"></div>
+      </div>
+    </div>
+
+    <!-- Budget Tab -->
+    <div id="budgetTab" style="display: none;">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Budget Overview</h3>
+          <div id="budgetOverview"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 1rem;">Spending by Category</h3>
+          <div id="budgetDetails"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- To-Do Tab -->
+    <div id="todosTab" style="display: none;">
+      <div class="card">
+        <div class="flex-between" style="margin-bottom: 1.5rem;">
+          <h3>Planning Checklist</h3>
+          <button class="btn btn-small btn-primary" onclick="openTodoModal()">+ Add Task</button>
+        </div>
+        <div id="todoList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- AUTH MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="authModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="authTitle">Sign In</h2>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    
+    <div class="tabs" style="margin-bottom: 2rem;">
+      <button class="tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="tab" onclick="switchAuthTab('register')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" style="display: block;">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="login()">Sign In</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" style="display: none;">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regFullName" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="tel" id="regPhone" placeholder="+91 98765 43210">
+      </div>
+      <div class="form-group">
+        <label>I am a</label>
+        <select id="regRole">
+          <option value="host">Event Host</option>
+          <option value="vendor">Vendor / Caterer</option>
+        </select>
+      </div>
+      <div class="form-group" id="businessNameGroup">
+        <label>Business Name</label>
+        <input type="text" id="regBusinessName" placeholder="Your business name">
+      </div>
+      <div class="form-group" id="locationGroup">
+        <label>Location</label>
+        <input type="text" id="regLocation" placeholder="City/Area">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" style="width: 100%;" onclick="register()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- EVENT MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="eventModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Create Event</h2>
+      <button class="modal-close" onclick="closeModal('eventModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Event Title</label>
+      <input type="text" id="eventTitle" placeholder="Wedding, Birthday, Corporate...">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="eventDesc" placeholder="Tell us about your event"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Event Date & Time</label>
+      <input type="datetime-local" id="eventDate">
+    </div>
+    <div class="form-group">
+      <label>Location</label>
+      <input type="text" id="eventLocation" placeholder="Venue address">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="form-group">
+        <label>Expected Guests</label>
+        <input type="number" id="eventGuests" placeholder="100">
+      </div>
+      <div class="form-group">
+        <label>Budget (₹)</label>
+        <input type="number" id="eventBudget" placeholder="50000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Theme</label>
+      <select id="eventTheme">
+        <option value="">Select a theme</option>
+        <option value="traditional">Traditional</option>
+        <option value="modern">Modern</option>
+        <option value="minimalist">Minimalist</option>
+        <option value="festive">Festive</option>
+        <option value="elegant">Elegant</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="saveEvent()">Create Event</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- PRODUCT MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add Product</h2>
+      <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Product Name</label>
+      <input type="text" id="productName" placeholder="e.g., Butter Chicken Combo">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="productDesc" placeholder="Describe what you're offering"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="productCategory">
+        <option value="catering">Catering</option>
+        <option value="decoration">Decoration</option>
+        <option value="drinks">Drinks</option>
+        <option value="desserts">Desserts</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="form-group">
+        <label>Price (₹)</label>
+        <input type="number" id="productPrice" placeholder="500">
+      </div>
+      <div class="form-group">
+        <label>Min Quantity</label>
+        <input type="number" id="minQuantity" placeholder="1" value="1">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Product Image</label>
+      <input type="file" id="productImage" accept="image/*">
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="saveProduct()">Add Product</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- INVITE MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="inviteModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Send Invites</h2>
+      <button class="modal-close" onclick="closeModal('inviteModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Guest Emails (comma-separated)</label>
+      <textarea id="inviteEmails" placeholder="guest1@email.com, guest2@email.com, guest3@email.com"></textarea>
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="sendInvites()">Send Invites</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- TODO MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="todoModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add Task</h2>
+      <button class="modal-close" onclick="closeModal('todoModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Task Title</label>
+      <input type="text" id="todoTitle" placeholder="e.g., Confirm catering">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="todoDesc" placeholder="Task details"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="todoPriority">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+        <option value="urgent">Urgent</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Due Date</label>
+      <input type="datetime-local" id="todoDueDate">
+    </div>
+    <button class="btn btn-primary" style="width: 100%;" onclick="saveTodo()">Add Task</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- VENDOR DETAIL MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="vendorDetailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="vendorDetailName">Vendor Details</h2>
+      <button class="modal-close" onclick="closeModal('vendorDetailModal')">close</button>
+    </div>
+    <div id="vendorDetailContent"></div>
+
+    <!-- ABSA inline review analyser inside vendor modal -->
+    <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+      <h4 style="margin-bottom:0.8rem;">ABSA Review Analyser</h4>
+      <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.8rem;">
+        Paste any review to extract aspect-level sentiment using the ABSA engine.
+      </p>
+      <textarea id="absa-review-input" rows="3"
+        style="width:100%;padding:0.7rem;border:1px solid var(--border);border-radius:8px;
+               background:var(--bg-sec);color:var(--text);font-family:inherit;font-size:0.88rem;resize:vertical;"
+        placeholder="The food was amazing but the service was really slow..."></textarea>
+      <button id="absa-analyze-btn" class="btn btn-primary btn-small"
+        style="margin-top:0.6rem;" onclick="analyzeReviewAbsa()">Analyse</button>
+
+      <div id="absa-result-panel" style="display:none;margin-top:1rem;">
+        <div style="margin-bottom:0.6rem;" id="absa-result-score"></div>
+        <div id="absa-result-aspects"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ABSA BUDGET PLANNER MODAL -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal" id="absaPlannerModal">
+  <div class="modal-content" style="max-width:760px;">
+    <div class="modal-header">
+      <h2>ABSA Budget Planner</h2>
+      <button class="modal-close" onclick="closeModal('absaPlannerModal')">close</button>
+    </div>
+    <p class="text-muted" style="font-size:0.85rem;margin-bottom:1rem;">
+      Enter vendors as JSON and let the ABSA recommendation engine pick the best combination within your budget.
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">Total Budget (INR)</label>
+        <input id="absa-budget-input" type="number" class="form-input" value="250000" min="1000">
+      </div>
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">Mode</label>
+        <select id="absa-mode-select" class="form-input">
+          <option value="auto">Auto - priority split</option>
+          <option value="manual">Manual - equal split</option>
+        </select>
+      </div>
+    </div>
+
+    <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">
+      Vendors (JSON array)
+    </label>
+    <textarea id="absa-vendors-input" rows="9"
+      style="width:100%;padding:0.7rem;border:1px solid var(--border);border-radius:8px;
+             background:var(--bg-sec);color:var(--text);font-family:monospace;font-size:0.8rem;resize:vertical;"
+      placeholder='[
+  {"name":"Grand Hall","category":"venue","price":80000,"absa_score":0.75,"review_count":30},
+  {"name":"Elite Catering","category":"catering","price":60000,"absa_score":0.82,"review_count":45},
+  {"name":"Pixel Studios","category":"photography","price":35000,"absa_score":0.88,"review_count":20}
+]'></textarea>
+
+    <button id="absa-recommend-btn" class="btn btn-primary"
+      style="margin-top:0.8rem;width:100%;" onclick="runAbsaRecommend()">Find Best Combination</button>
+
+    <div id="absa-recommend-panel" style="display:none;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <h4 style="margin-bottom:0.8rem;">Recommended Combination</h4>
+      <div id="absa-recommend-result"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// EVENTIFY - FRONTEND APPLICATION
+// ═══════════════════════════════════════════════════════════════
+
+const API_URL = 'http://localhost:5000/api';
+let currentUser = null;
+let currentEvent = null;
+let currentTab = 'overview';
+
+// ═══════════════════════════════════════════════════════════════
+// ABSA HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+const ABSA_SENTIMENT_COLORS = {
+  positive: '#059669',
+  negative: '#dc2626',
+  neutral:  '#d97706',
+  conflict: '#7c3aed',
+};
+
+function renderAbsaAspects(aspects) {
+  if (!aspects || aspects.length === 0) {
+    return '<p class="text-muted" style="font-size:0.85rem;">No aspects detected.</p>';
+  }
+  return aspects.map(a => {
+    const col   = ABSA_SENTIMENT_COLORS[a.sentiment] || '#888';
+    const score = a.weighted_score;
+    const bar   = Math.round((score + 1) / 2 * 100);
+    return `
+      <div style="margin-bottom:0.7rem;padding:0.65rem 0.9rem;
+                  background:var(--bg-sec);border-radius:8px;
+                  border-left:3px solid ${col};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">
+          <span style="font-weight:600;font-size:0.88rem;text-transform:capitalize;">${a.aspect}</span>
+          <span style="font-size:0.78rem;color:${col};font-weight:600;">${a.sentiment}</span>
+        </div>
+        <div style="background:var(--border);height:4px;border-radius:2px;overflow:hidden;">
+          <div style="width:${bar}%;height:100%;background:${col};border-radius:2px;"></div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem;">
+          score ${score >= 0 ? '+' : ''}${score.toFixed(3)} &nbsp;|&nbsp; conf ${(a.confidence * 100).toFixed(0)}%
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function analyzeReviewAbsa() {
+  const text = document.getElementById('absa-review-input')?.value?.trim();
+  if (!text) return;
+  const btn = document.getElementById('absa-analyze-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analysing...';
+  try {
+    const res  = await fetch(`${API_URL}/absa/analyze`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    document.getElementById('absa-result-aspects').innerHTML = renderAbsaAspects(data.aspects);
+    document.getElementById('absa-result-score').innerHTML =
+      `<span style="font-size:1.3rem;font-weight:700;color:${data.overall_score >= 0 ? 'var(--success)' : 'var(--danger)'};">
+        ${data.overall_score >= 0 ? '+' : ''}${data.overall_score.toFixed(3)}
+      </span>
+      <span style="font-size:0.88rem;color:var(--text-muted);margin-left:0.5rem;">
+        ${data.star_rating} / 5 stars
+      </span>`;
+    document.getElementById('absa-result-panel').style.display = 'block';
+  } catch (e) {
+    showToast('ABSA service unavailable', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analyse';
+  }
+}
+
+async function runAbsaRecommend() {
+  const totalBudget = parseFloat(document.getElementById('absa-budget-input')?.value || 0);
+  const vendorsRaw  = document.getElementById('absa-vendors-input')?.value?.trim();
+  const mode        = document.getElementById('absa-mode-select')?.value || 'auto';
+
+  if (!totalBudget || !vendorsRaw) {
+    showToast('Enter budget and vendor data', 'error');
+    return;
+  }
+
+  let vendors;
+  try {
+    vendors = JSON.parse(vendorsRaw);
+  } catch (e) {
+    showToast('Invalid JSON in vendor input', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('absa-recommend-btn');
+  btn.disabled = true;
+  btn.textContent = 'Optimising...';
+
+  try {
+    const body = { mode, total_budget: totalBudget, vendors };
+
+    if (mode === 'auto') {
+      const cats = [...new Set(vendors.map(v => v.category))];
+      body.priority_order = cats;
+      body.lambda = 2.0;
+    } else {
+      const cats = [...new Set(vendors.map(v => v.category))];
+      const pct  = {};
+      cats.forEach(c => { pct[c] = 100 / cats.length; });
+      body.category_pct = pct;
+      body.reallocate   = true;
+    }
+
+    const res  = await fetch(`${API_URL}/absa/recommend`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    const sel     = data.selection || {};
+    const rows    = Object.entries(sel).map(([cat, v]) => v ? `
+      <tr>
+        <td style="padding:0.5rem;font-weight:600;text-transform:capitalize;">${cat}</td>
+        <td style="padding:0.5rem;">${v.name}</td>
+        <td style="padding:0.5rem;color:var(--indigo);">&#8377;${v.price.toLocaleString()}</td>
+        <td style="padding:0.5rem;color:${v.absa_score >= 0 ? 'var(--success)' : 'var(--danger)'};">
+          ${v.absa_score >= 0 ? '+' : ''}${v.absa_score.toFixed(3)}
+        </td>
+        <td style="padding:0.5rem;">${'&#9733;'.repeat(Math.round(v.star_rating))}${'&#9734;'.repeat(5 - Math.round(v.star_rating))}</td>
+      </tr>` : `
+      <tr>
+        <td style="padding:0.5rem;text-transform:capitalize;">${cat}</td>
+        <td colspan="4" style="padding:0.5rem;color:var(--danger);font-size:0.85rem;">No affordable vendor found</td>
+      </tr>`).join('');
+
+    document.getElementById('absa-recommend-result').innerHTML = `
+      <div style="margin-bottom:1rem;">
+        <strong>Total Cost:</strong> &#8377;${(data.total_cost || 0).toLocaleString()} &nbsp;
+        <strong>Remaining:</strong> <span style="color:var(--success);">&#8377;${(data.remaining || 0).toLocaleString()}</span> &nbsp;
+        <strong>Quality Index:</strong> ${(data.obj || 0).toFixed(4)}
+        ${data.solver ? `&nbsp; <span style="font-size:0.78rem;color:var(--text-muted);">solver: ${data.solver}</span>` : ''}
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);">
+              <th style="padding:0.5rem;text-align:left;color:var(--text-muted);">Category</th>
+              <th style="padding:0.5rem;text-align:left;color:var(--text-muted);">Vendor</th>
+              <th style="padding:0.5rem;text-align:left;color:var(--text-muted);">Price</th>
+              <th style="padding:0.5rem;text-align:left;color:var(--text-muted);">ABSA Score</th>
+              <th style="padding:0.5rem;text-align:left;color:var(--text-muted);">Stars</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${data.upgrades && data.upgrades.length > 0 ? `
+        <div style="margin-top:0.8rem;font-size:0.82rem;color:var(--text-muted);">
+          <strong>Upgrades applied:</strong><br>
+          ${data.upgrades.map(u => `<div style="margin-top:0.2rem;">${u}</div>`).join('')}
+        </div>` : ''}`;
+
+    document.getElementById('absa-recommend-panel').style.display = 'block';
+  } catch (e) {
+    showToast('Recommendation failed', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Find Best Combination';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+
+// Initialize theme
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function showPage(pageName) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageName + 'Page').classList.add('active');
+  
+  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+  event?.target?.classList.add('active');
+  
+  // Load page data
+  if (pageName === 'discover') loadVendors();
+  if (pageName === 'vendor' && currentUser?.role === 'vendor') loadVendorDashboard();
+  if (pageName === 'host' && currentUser?.role === 'host') loadEvents();
+  if (pageName === 'home') loadFeaturedVendors();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTHENTICATION
+// ═══════════════════════════════════════════════════════════════
+
+function openAuthModal(role = null) {
+  if (!currentUser) {
+    document.getElementById('authModal').classList.add('active');
+    if (role === 'vendor') document.getElementById('regRole').value = 'vendor';
+    if (role === 'host') document.getElementById('regRole').value = 'host';
+  }
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.querySelectorAll('#authModal .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    if (!res.ok) throw new Error('Login failed');
+    const data = await res.json();
+    
+    localStorage.setItem('token', data.token);
+    currentUser = data.user;
+    updateUI();
+    closeModal('authModal');
+    showToast('Welcome back!', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function register() {
+  const data = {
+    email: document.getElementById('regEmail').value,
+    password: document.getElementById('regPassword').value,
+    fullName: document.getElementById('regFullName').value,
+    phone: document.getElementById('regPhone').value,
+    role: document.getElementById('regRole').value,
+    businessName: document.getElementById('regBusinessName')?.value,
+    location: document.getElementById('regLocation')?.value
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    if (!res.ok) throw new Error('Registration failed');
+    const result = await res.json();
+    
+    localStorage.setItem('token', result.token);
+    currentUser = result.user;
+    updateUI();
+    closeModal('authModal');
+    showToast('Welcome to Eventify!', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  currentUser = null;
+  updateUI();
+  showPage('home');
+  showToast('Logged out successfully', 'success');
+}
+
+function updateUI() {
+  const authBtn = document.getElementById('authBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const vendorNav = document.getElementById('vendorNavLink');
+  const hostNav = document.getElementById('hostNavLink');
+  
+  if (currentUser) {
+    authBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+    vendorNav.style.display = currentUser.role === 'vendor' ? 'block' : 'none';
+    hostNav.style.display = currentUser.role === 'host' ? 'block' : 'none';
+  } else {
+    authBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+    vendorNav.style.display = 'none';
+    hostNav.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VENDORS
+// ═══════════════════════════════════════════════════════════════
+
+async function loadFeaturedVendors() {
+  try {
+    const res = await fetch(`${API_URL}/vendors`);
+    const vendors = await res.json();
+    
+    const html = vendors.slice(0, 6).map(v => `
+      <div class="vendor-card" onclick="viewVendorDetail(${v.user_id})">
+        <div class="vendor-avatar">${v.business_name?.charAt(0) || '✨'}</div>
+        <div class="vendor-name">${v.business_name || v.full_name}</div>
+        <div class="vendor-info">${v.location || 'Pune'}</div>
+        <div class="vendor-rating">⭐ 4.5</div>
+      </div>
+    `).join('');
+    
+    document.getElementById('featuredVendors').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading vendors:', error);
+  }
+}
+
+async function loadVendors() {
+  try {
+    const res = await fetch(`${API_URL}/vendors`);
+    const vendors = await res.json();
+    
+    const html = vendors.map(v => `
+      <div class="vendor-card" onclick="viewVendorDetail(${v.user_id})">
+        <div class="vendor-avatar">${v.business_name?.charAt(0) || '✨'}</div>
+        <div class="vendor-name">${v.business_name || v.full_name}</div>
+        <div class="vendor-info">${v.location || 'Pune'}</div>
+        <div class="vendor-rating">⭐ 4.5</div>
+        <button class="btn btn-small btn-primary" style="width: 100%; margin-top: 0.8rem;" onclick="event.stopPropagation(); addVendorToEvent(${v.user_id})">+ Add</button>
+      </div>
+    `).join('');
+    
+    document.getElementById('vendorsGrid').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading vendors:', error);
+  }
+}
+
+async function viewVendorDetail(vendorId) {
+  try {
+    const res = await fetch(`${API_URL}/vendors/${vendorId}`);
+    const vendor = await res.json();
+    
+    let html = `
+      <div style="margin-bottom: 1.5rem;">
+        <h3>${vendor.business_name || vendor.full_name}</h3>
+        <p class="text-muted">${vendor.location || 'Pune'}</p>
+        <p style="margin: 1rem 0;">${vendor.description || 'Professional vendor'}</p>
+      </div>
+    `;
+    
+    if (vendor.products && vendor.products.length > 0) {
+      html += '<h4 style="margin-bottom: 1rem;">Products & Services</h4>';
+      html += '<div class="grid grid-2">';
+      html += vendor.products.map(p => `
+        <div class="card">
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">₹${p.price}</div>
+          <p class="text-muted" style="font-size: 0.85rem;">${p.description || 'Quality product'}</p>
+          <button class="btn btn-small btn-primary" style="width: 100%; margin-top: 0.5rem;" onclick="event.stopPropagation()">Add to Order</button>
+        </div>
+      `).join('');
+      html += '</div>';
+    }
+    
+    document.getElementById('vendorDetailContent').innerHTML = html;
+    document.getElementById('vendorDetailName').textContent = vendor.business_name || vendor.full_name;
+    // Reset ABSA panel
+    document.getElementById('absa-review-input').value = '';
+    document.getElementById('absa-result-panel').style.display = 'none';
+    document.getElementById('vendorDetailModal').classList.add('active');
+  } catch (error) {
+    showToast('Error loading vendor', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VENDOR DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+
+async function loadVendorDashboard() {
+  await loadVendorProducts();
+  await loadVendorProfile();
+}
+
+async function loadVendorProducts() {
+  if (!currentUser) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/vendors/${currentUser.userId}/products`);
+    const products = await res.json();
+    
+    const html = products.length > 0 ? products.map(p => `
+      <div class="product-card">
+        <div class="product-image">${p.image_url ? `<img src="${p.image_url}" style="width: 100%; height: 100%; object-fit: cover;">` : '🍲'}</div>
+        <div class="product-info">
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">₹${p.price}</div>
+          <div class="product-desc">${p.category}</div>
+          <div class="product-actions">
+            <button class="btn btn-small btn-secondary" onclick="editProduct(${p.product_id})">Edit</button>
+            <button class="btn btn-small btn-danger" onclick="deleteProduct(${p.product_id})">Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join('') : '<p class="text-muted">No products yet. Add your first product!</p>';
+    
+    document.getElementById('productsGrid').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading products:', error);
+  }
+}
+
+async function loadVendorProfile() {
+  if (!currentUser) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const user = await res.json();
+    
+    document.getElementById('businessName').value = user.business_name || '';
+    document.getElementById('businessLocation').value = user.location || '';
+    document.getElementById('businessDesc').value = user.description || '';
+  } catch (error) {
+    console.error('Error loading profile:', error);
+  }
+}
+
+async function updateVendorProfile() {
+  const formData = new FormData();
+  formData.append('businessName', document.getElementById('businessName').value);
+  formData.append('location', document.getElementById('businessLocation').value);
+  formData.append('description', document.getElementById('businessDesc').value);
+  
+  const profileImageInput = document.getElementById('profileImage');
+  if (profileImageInput.files.length > 0) {
+    formData.append('profileImage', profileImageInput.files[0]);
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/vendors/${currentUser.userId}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      body: formData
+    });
+    
+    if (!res.ok) throw new Error('Failed to update profile');
+    showToast('Profile updated successfully', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+function switchVendorTab(tab) {
+  document.getElementById('productsTab').style.display = tab === 'products' ? 'block' : 'none';
+  document.getElementById('profileTab').style.display = tab === 'profile' ? 'block' : 'none';
+  document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+  
+  document.querySelectorAll('#vendorPage .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════════════════════════════
+
+function openProductModal() {
+  if (!currentUser) {
+    openAuthModal('vendor');
+    return;
+  }
+  document.getElementById('productModal').classList.add('active');
+}
+
+async function saveProduct() {
+  const formData = new FormData();
+  formData.append('name', document.getElementById('productName').value);
+  formData.append('description', document.getElementById('productDesc').value);
+  formData.append('price', document.getElementById('productPrice').value);
+  formData.append('category', document.getElementById('productCategory').value);
+  formData.append('minQuantity', document.getElementById('minQuantity').value);
+  
+  const fileInput = document.getElementById('productImage');
+  if (fileInput.files.length > 0) {
+    formData.append('image', fileInput.files[0]);
+  }
+  
+  try {
+    const res = await fetch(`${API_URL}/products`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      body: formData
+    });
+    
+    if (!res.ok) throw new Error('Failed to create product');
+    
+    closeModal('productModal');
+    loadVendorProducts();
+    showToast('Product added successfully', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function deleteProduct(productId) {
+  if (!confirm('Delete this product?')) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/products/${productId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    
+    if (!res.ok) throw new Error('Failed to delete product');
+    loadVendorProducts();
+    showToast('Product deleted', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════════
+
+function openEventModal() {
+  if (!currentUser) {
+    openAuthModal('host');
+    return;
+  }
+  document.getElementById('eventModal').classList.add('active');
+}
+
+async function saveEvent() {
+  const eventData = {
+    title: document.getElementById('eventTitle').value,
+    description: document.getElementById('eventDesc').value,
+    eventDate: document.getElementById('eventDate').value,
+    location: document.getElementById('eventLocation').value,
+    guestCount: parseInt(document.getElementById('eventGuests').value),
+    budget: parseFloat(document.getElementById('eventBudget').value),
+    theme: document.getElementById('eventTheme').value
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(eventData)
+    });
+    
+    if (!res.ok) throw new Error('Failed to create event');
+    
+    closeModal('eventModal');
+    loadEvents();
+    showToast('Event created successfully', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function loadEvents() {
+  if (!currentUser) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const events = await res.json();
+    
+    const html = events.length > 0 ? events.map(e => `
+      <div class="card" onclick="loadEventDetail(${e.event_id})" style="cursor: pointer;">
+        <h3>${e.title}</h3>
+        <p class="text-muted">${new Date(e.event_date).toLocaleDateString()}</p>
+        <p>${e.location}</p>
+        <div style="margin-top: 1rem;">
+          <span class="badge badge-success">${e.guest_count} Guests</span>
+          <span class="badge badge-warning">₹${e.budget}</span>
+        </div>
+      </div>
+    `).join('') : '<p class="text-muted">No events yet</p>';
+    
+    document.getElementById('eventsList').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading events:', error);
+  }
+}
+
+async function loadEventDetail(eventId) {
+  if (!currentUser) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${eventId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    currentEvent = await res.json();
+    
+    // Display event overview
+    document.getElementById('eventDetails').innerHTML = `
+      <div>
+        <h4>${currentEvent.title}</h4>
+        <p class="text-muted" style="margin: 0.5rem 0;">${currentEvent.location}</p>
+        <p style="margin: 0.5rem 0;">${new Date(currentEvent.event_date).toLocaleString()}</p>
+        <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span class="badge badge-success">${currentEvent.guest_count} Guests</span>
+          <span class="badge badge-warning">₹${currentEvent.budget}</span>
+          <span class="badge badge-info">${currentEvent.theme || 'No theme'}</span>
+        </div>
+        <p style="margin-top: 1rem; color: var(--text-muted);">${currentEvent.description}</p>
+      </div>
+    `;
+    
+    // Load RSVPs, budget, todos, etc
+    await loadRSVPStats();
+    await loadVendorRecommendations();
+    await loadOrderItems();
+    await loadBudget();
+    await loadTodos();
+    
+    showPage('eventDetail');
+  } catch (error) {
+    showToast('Error loading event', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RSVP MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+async function loadRSVPStats() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/rsvps`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await res.json();
+    
+    document.getElementById('rsvpStats').innerHTML = `
+      <div class="rsvp-stat">
+        <span>Total Responses</span>
+        <span class="rsvp-count">${data.stats.total}</span>
+      </div>
+      <div class="rsvp-stat">
+        <span>✓ Accepted</span>
+        <span class="rsvp-count text-success">${data.stats.accepted}</span>
+      </div>
+      <div class="rsvp-stat">
+        <span>✕ Declined</span>
+        <span class="rsvp-count text-danger">${data.stats.declined}</span>
+      </div>
+      <div class="rsvp-stat">
+        <span>? Maybe</span>
+        <span class="rsvp-count text-warning">${data.stats.maybe}</span>
+      </div>
+      <div class="rsvp-stat">
+        <span>Total Guests</span>
+        <span class="rsvp-count">${data.stats.totalGuests}</span>
+      </div>
+    `;
+    
+    document.getElementById('guestList').innerHTML = data.rsvps.length > 0 ? 
+      data.rsvps.map(r => `
+        <div class="card" style="margin-bottom: 0.8rem;">
+          <div class="flex-between">
+            <div>
+              <div style="font-weight: 500;">${r.guest_name}</div>
+              <div class="text-muted" style="font-size: 0.85rem;">${r.guest_email}</div>
+            </div>
+            <div>
+              <span class="badge ${r.status === 'accepted' ? 'badge-success' : r.status === 'declined' ? 'badge-danger' : 'badge-warning'}">
+                ${r.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
+      `).join('') : '<p class="text-muted">No responses yet</p>';
+  } catch (error) {
+    console.error('Error loading RSVPs:', error);
+  }
+}
+
+function openInviteModal() {
+  document.getElementById('inviteModal').classList.add('active');
+}
+
+async function sendInvites() {
+  if (!currentEvent) return;
+  
+  const emailsText = document.getElementById('inviteEmails').value;
+  const emails = emailsText.split(',').map(e => e.trim()).filter(e => e);
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/send-invites`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ emails })
+    });
+    
+    if (!res.ok) throw new Error('Failed to send invites');
+    
+    closeModal('inviteModal');
+    showToast(`Invites sent to ${emails.length} guests`, 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VENDOR RECOMMENDATIONS
+// ═══════════════════════════════════════════════════════════════
+
+async function generateRecommendations() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/generate-recommendations`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    
+    if (!res.ok) throw new Error('Failed to generate recommendations');
+    
+    showToast('Recommendations generated', 'success');
+    await loadVendorRecommendations();
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function loadVendorRecommendations() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/recommendations`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const recommendations = await res.json();
+    
+    document.getElementById('recommendationsGrid').innerHTML = recommendations.length > 0 ?
+      recommendations.map((r, i) => `
+        <div class="card">
+          <div class="flex-between" style="margin-bottom: 1rem;">
+            <div>
+              <div style="font-weight: 600; font-size: 1.1rem;">#${i + 1}</div>
+              <div style="font-weight: 500;">${r.business_name}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="color: var(--warning); font-size: 1.2rem;">⭐ ${(r.match_score * 5).toFixed(1)}</div>
+              <div class="text-muted" style="font-size: 0.8rem;">Match</div>
+            </div>
+          </div>
+          <div class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">${r.reason}</div>
+          <button class="btn btn-small btn-primary" style="width: 100%;" onclick="viewVendorDetail(${r.vendor_id})">View Details</button>
+        </div>
+      `).join('') : '<p class="text-muted">No recommendations yet. Generate some!</p>';
+  } catch (error) {
+    console.error('Error loading recommendations:', error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ORDERS & PAYMENT
+// ═══════════════════════════════════════════════════════════════
+
+async function loadOrderItems() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/order-items`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const items = await res.json();
+    
+    document.getElementById('orderItemsList').innerHTML = items.length > 0 ?
+      `<div style="display: grid; gap: 1rem;">${items.map(item => `
+        <div class="card">
+          <div class="flex-between">
+            <div>
+              <div style="font-weight: 600;">${item.product_name}</div>
+              <div class="text-muted">${item.vendor_name}</div>
+              <div style="margin-top: 0.5rem; color: var(--indigo); font-weight: 600;">
+                ₹${item.total_price} (Qty: ${item.quantity})
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge ${item.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">
+                ${item.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
+      `).join('')}</div>` : '<p class="text-muted">No orders yet</p>';
+  } catch (error) {
+    console.error('Error loading orders:', error);
+  }
+}
+
+function addVendorToEvent(vendorId) {
+  if (!currentEvent) {
+    showToast('Please create an event first', 'error');
+    return;
+  }
+  // Load vendor products and add to event
+  viewVendorDetail(vendorId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUDGET TRACKING
+// ═══════════════════════════════════════════════════════════════
+
+async function loadBudget() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/budget`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const budgetData = await res.json();
+    
+    const percentage = (budgetData.totalSpent / budgetData.totalBudgeted) * 100;
+    
+    document.getElementById('budgetOverview').innerHTML = `
+      <div style="margin-bottom: 1.5rem;">
+        <div class="flex-between" style="margin-bottom: 0.5rem;">
+          <span>Total Budget</span>
+          <span style="font-weight: 600;">₹${budgetData.totalBudgeted}</span>
+        </div>
+        <div class="flex-between" style="margin-bottom: 0.5rem;">
+          <span>Total Spent</span>
+          <span style="font-weight: 600; color: var(--danger);">₹${budgetData.totalSpent}</span>
+        </div>
+        <div class="flex-between">
+          <span>Remaining</span>
+          <span style="font-weight: 600; color: var(--success);">₹${budgetData.remaining}</span>
+        </div>
+      </div>
+      <div class="budget-bar">
+        <div class="budget-fill" style="width: ${Math.min(percentage, 100)}%; background: ${percentage > 100 ? 'var(--danger)' : 'linear-gradient(90deg, var(--indigo), var(--purple))'}"></div>
+      </div>
+      <div style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.85rem;">
+        ${percentage.toFixed(0)}% spent
+      </div>
+    `;
+    
+    document.getElementById('budgetDetails').innerHTML = budgetData.budgets.map(b => `
+      <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.8rem;">
+        <div class="flex-between" style="margin-bottom: 0.5rem;">
+          <span style="font-weight: 500;">${b.category}</span>
+          <span style="color: var(--indigo); font-weight: 600;">₹${b.spent_amount || 0}</span>
+        </div>
+        <div class="budget-bar">
+          <div class="budget-fill" style="width: ${(b.spent_amount / (b.budgeted_amount || 1)) * 100}%"></div>
+        </div>
+        <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Budget: ₹${b.budgeted_amount || 0}</div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading budget:', error);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TO-DO MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function openTodoModal() {
+  document.getElementById('todoModal').classList.add('active');
+}
+
+async function saveTodo() {
+  if (!currentEvent) return;
+  
+  const todoData = {
+    title: document.getElementById('todoTitle').value,
+    description: document.getElementById('todoDesc').value,
+    priority: document.getElementById('todoPriority').value,
+    dueDate: document.getElementById('todoDueDate').value,
+    category: 'event-planning'
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/todos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(todoData)
+    });
+    
+    if (!res.ok) throw new Error('Failed to create todo');
+    
+    closeModal('todoModal');
+    loadTodos();
+    showToast('Task added', 'success');
+  } catch (error) {
+    showToast(error.message, 'error');
+  }
+}
+
+async function loadTodos() {
+  if (!currentEvent) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/events/${currentEvent.event_id}/todos`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const todos = await res.json();
+    
+    document.getElementById('todoList').innerHTML = todos.length > 0 ?
+      todos.map(t => `
+        <div class="todo-item ${t.completed ? 'completed' : ''}">
+          <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTodo(${t.todo_id}, this.checked)">
+          <div class="todo-content">
+            <div class="todo-title">${t.title}</div>
+            ${t.description ? `<div class="todo-desc">${t.description}</div>` : ''}
+          </div>
+          <span class="todo-priority ${t.priority}">${t.priority}</span>
+          <button class="btn btn-small btn-danger" onclick="deleteTodo(${t.todo_id})">Delete</button>
+        </div>
+      `).join('') : '<p class="text-muted">No tasks yet</p>';
+  } catch (error) {
+    console.error('Error loading todos:', error);
+  }
+}
+
+async function toggleTodo(todoId, completed) {
+  try {
+    await fetch(`${API_URL}/todos/${todoId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ completed })
+    });
+    
+    loadTodos();
+  } catch (error) {
+    showToast('Error updating task', 'error');
+  }
+}
+
+async function deleteTodo(todoId) {
+  try {
+    await fetch(`${API_URL}/todos/${todoId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    
+    loadTodos();
+  } catch (error) {
+    showToast('Error deleting task', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAB MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function switchEventTab(tab) {
+  currentTab = tab;
+  document.getElementById('overviewTab').style.display = tab === 'overview' ? 'block' : 'none';
+  document.getElementById('rsvpTab').style.display = tab === 'rsvp' ? 'block' : 'none';
+  document.getElementById('vendorsTab').style.display = tab === 'vendors' ? 'block' : 'none';
+  document.getElementById('budgetTab').style.display = tab === 'budget' ? 'block' : 'none';
+  document.getElementById('todosTab').style.display = tab === 'todos' ? 'block' : 'none';
+  
+  document.querySelectorAll('#eventDetailPage .tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('active');
+  
+  // Clear form data
+  if (modalId === 'productModal') {
+    document.getElementById('productForm')?.reset?.();
+  }
+  if (modalId === 'eventModal') {
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDesc').value = '';
+    document.getElementById('eventDate').value = '';
+    document.getElementById('eventLocation').value = '';
+    document.getElementById('eventGuests').value = '';
+    document.getElementById('eventBudget').value = '';
+    document.getElementById('eventTheme').value = '';
+  }
+  if (modalId === 'inviteModal') {
+    document.getElementById('inviteEmails').value = '';
+  }
+  if (modalId === 'todoModal') {
+    document.getElementById('todoTitle').value = '';
+    document.getElementById('todoDesc').value = '';
+    document.getElementById('todoPriority').value = 'medium';
+    document.getElementById('todoDueDate').value = '';
+  }
+  if (modalId === 'absaPlannerModal') {
+    document.getElementById('absa-recommend-panel').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  
+  // Check if user is logged in
+  const token = localStorage.getItem('token');
+  if (token) {
+    fetch(`${API_URL}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(user => {
+      if (user) {
+        currentUser = user;
+        updateUI();
+      }
+    })
+    .catch(() => {
+      localStorage.removeItem('token');
+      currentUser = null;
+      updateUI();
+    });
+  }
+  
+  updateUI();
+  loadFeaturedVendors();
+});
+
+// Close modals on outside click
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    e.target.classList.remove('active');
+  }
+});
+</script>
+
+</body>
+</html>
