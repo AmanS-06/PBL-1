@@ -37,15 +37,20 @@ app = Flask(
     template_folder=os.path.join(BASE_DIR, "templates"),
 )
 app.secret_key = os.environ.get("SECRET_KEY", "eventify-dev-secret-2026")
+
+# --- RAILWAY MYSQL CONNECTION FIX ---
 db_url = os.environ.get("DATABASE_URL", "mysql+pymysql://eventify_user:eventify_password@localhost:3306/eventify_db")
+
+# Add these two lines right here!
+if db_url and db_url.startswith("mysql://"):
+    db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 
 CORS(app, supports_credentials=True, origins=["http://localhost:5000", "http://127.0.0.1:5000"])
-
-db = SQLAlchemy(app)
 
 # ──────────────────────────────────────────────────────────
 # Models
