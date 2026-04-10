@@ -939,9 +939,9 @@ def seed_demo_data():
     print("[seed] Demo vendor data inserted.")
 
 
-with app.app_context():
-    db.create_all()
-    seed_demo_data()
+#with app.app_context():
+#    db.create_all()
+#    seed_demo_data()
 
 
 if __name__ == "__main__":
