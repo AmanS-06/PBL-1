@@ -510,10 +510,19 @@ def analyze_live():
     data = request.json
     review_text = data.get("text", "")
     
-    # Pass it to the function we just built
-    score_data = score_single_review(review_text)
+    # Use the safe rule-based engine instead of the heavy ML model
+    from absa_engine import analyse_text
+    absa_results = analyse_text(review_text)
     
-    return jsonify(score_data)
+    if not absa_results:
+        overall_sc = 0.0
+    else:
+        overall_sc = sum(r["weighted_score"] for r in absa_results) / len(absa_results)
+    
+    return jsonify({
+        "raw_score": overall_sc,
+        "detailed_results": absa_results
+    })
 
 # ══════════════════════════════════════════════════════════
 # HOST — GUEST LIST
